@@ -1,0 +1,211 @@
+# 📘 D-RAY SHOW — BREAKING NEWS DESK
+## Master Blueprint • PWA v10 • "Hand this document to any AI as your first message"
+
+---
+
+## 1. PRODUCT DEFINITION
+
+**Name:** D-Ray Show — Breaking News Desk (public site: "D-Ray Show Blog News")
+**Tagline:** YOUR DAILY GLOBAL UPDATE
+**Strapline:** Latest Updates. Global Coverage. Unbiased Reporting.
+**Owner:** D-Ray Show, a Nigerian media house covering sports, politics and current happenings (Nigeria / Africa / World).
+**Purpose:** A private, mobile-first PWA workspace for 5 staff that (a) monitors breaking news from curated world/Africa/Nigeria channels, (b) rewrites each break with an AI in the house editorial style into 6 ready-to-copy formats, and (c) publishes full articles to a real, SEO-ready public blog hosted on the same deployment.
+**Hard constraints:** built and maintained **entirely from a phone**; hosted only on **GitHub + Vercel**; **no custom domain** (uses `*.vercel.app`); **no paid backend/database** — free tiers only.
+
+---
+
+## 2. BRAND SYSTEM (apply everywhere)
+
+| Token | Value |
+|---|---|
+| Primary blue | `#1E5AA8` → `#3F8EDC` gradient |
+| Signal red | `#C62828` → `#E53935` |
+| Workspace bg | `#0A1220` (deep navy); cards `#101E36`→`#132544`; lines `#1D2E4D` |
+| READY green | `#22C55E` (pulsing dot) |
+| Text / muted | `#F4F7FB` / `#9FB0C7` |
+| Fonts | Montserrat ExtraBold (headings/wordmark), Inter (body) |
+| Logo | Shield split blue/red with white "R" and lightning bolt; used as app icon, favicon, watermark top-left on 4:5 image prompts, header brand |
+| Sign-off (always) | `📺 D-Ray Show — Your Daily Global Update.` |
+| Credit rule (always) | `📰 Credit: {Source Name}` |
+| Handles (append to social outputs) | IG `@dray.show` • X `@show_ray2026` • YT `@drayshow-politicssport` • FB page `D RAY SHOW` • TikTok `@drayshow` |
+
+---
+
+## 3. USERS, ROLES, AUTH
+
+- 5 local accounts (client-side check; internal-tool trade-off accepted):
+  `admin1/1111`, `admin2/2222`, `admin3/3333` (Admin), `editor1/4444`, `editor2/5555` (Editor).
+- Session persisted in `localStorage` (`drs_user`, `drs_role`); login screen shows logo, name, tagline; logout in Settings.
+- Roadmap: server-side auth (e.g., Supabase) when a backend becomes acceptable.
+
+---
+
+## 4. ARCHITECTURE
+
+```
+[Phone PWA (single index.html, vanilla JS, no build step)]
+   │  same-origin
+   ├── /api/feeds ........ Vercel serverless fn: fetches 10 RSS feeds server-side (no CORS), returns JSON
+   ├── /blog/*.html ...... static published posts (created at runtime via GitHub API)
+   ├── /blog/index.json .. posts index (created/updated at runtime via GitHub API)
+   ├── /blog/ ............ public blog homepage (static blog/index.html)
+   │
+   ├── AI providers ...... xAI Grok OR Groq (auto-detected by key prefix), called client-side
+   ├── Article scrape .... https://r.jina.ai/{article-url} (CORS-friendly full-text)
+   ├── Fallback news ..... 5 public CORS proxies (only if relay missing)
+   └── GitHub REST API ... publishes/edits blog files & installs the relay (token stored on device)
+```
+
+**Why single-file vanilla frontend:** the owner edits code from a phone via GitHub's mobile editor; no framework, no build, zero-config Vercel.
+**No database:** per-device state in `localStorage`; shared content (blog) lives as files in the GitHub repo, served statically by Vercel.
+
+---
+
+## 5. REPOSITORY / FILE STRUCTURE
+
+```
+/ index.html          ← the whole app (UI + logic), replaced wholesale per build
+/ manifest.json       ← PWA manifest
+/ sw.js               ← service worker (network-first)
+/ logo.png            ← shield logo (app icon, favicon, OG image)
+/ api/feeds.js        ← serverless news relay (app can self-install via GitHub API)
+/ blog/index.html     ← public blog homepage (search + list)
+/ blog/index.json     ← generated posts index
+/ blog/{slug}.html    ← generated SEO post pages
+/ blog/img/{slug}.jpg ← generated post images
+```
+
+---
+
+## 6. PWA LAYER
+
+**manifest.json:** name "D-Ray Show Newsroom", short_name "D-Ray Desk", `start_url "/"`, `display "standalone"`, `background_color #0A1220`, `theme_color #1E5AA8`, icons → `logo.png` (192 & 512 entries).
+**sw.js (MUST be network-first):** cache name versioned (e.g. `dray-v3`); `install → skipWaiting()`; `activate → delete old caches + clients.claim()`; `fetch → try network, cache a copy, fall back to cache on failure`.
+*Rationale:* an earlier cache-first worker served stale builds and caused "nothing updates" bugs — network-first is mandatory.
+**Install:** browser → Add to Home Screen.
+
+---
+
+## 7. SCREEN-BY-SCREEN SPEC
+
+**Bottom nav (6, fixed):** Desk • Alerts • Sources • Blog • Drafts • Settings.
+**Header:** logo + wordmark + tagline; region dropdown (All / World / Africa / Nigeria); 🔄 manual scan.
+
+### 7.1 Desk (dashboard)
+- Scanline: `🛰 Build vN • relay: ⚡Vercel | 🌐proxy | ❌missing • auto-scan 3 min • today: N stories • 🔄 scanning… • last scan: HH:MM GMT`.
+- News card: READY badge (green pulsing) / `AI WRITING…` (blue spinner) / `⚠ RETRY BELOW` (red); headline; meta line `🕒 Posted HH:MM GMT • {time label} • {flag} {country} • Source: {source}` (+ `🧪 SAMPLE` chip).
+- Time labels: `<10m → 🔥 FRESH BREAKING` (red bold); `<60m → "Xm ago"`; `1h → "1 hour ago"`; `<24h → "X hours ago"`; else `"Xd ago"`.
+- Buttons per card: `⚡ GENERATE` (red), `⟳ REGENERATE` (new angle).
+- After generation: crafted-headline box (red left border) + 6 tabs + row [`💾 SAVE` `📤 PUBLISH` `📋 COPY`] + output box + credit line.
+- Tabs in exact order/labels: **Facebook • Twitter / X • Voice-Over • Commentary • Full Article • Image Prompt**. Each tab shows ONLY its own clean plain text; COPY copies current tab.
+- Auto-scan every **180 s**; incremental render as each feed lands; toast `🟢 N new stories…` + beep (toggleable).
+- Empty state: FETCH NOW + LOAD SAMPLE BREAK; samples auto-load only when zero stories.
+
+### 7.2 Alerts — list of today's breaks: `🟢 title | HH:MM • label`.
+### 7.3 Sources — static monitored list (see §8a).
+### 7.4 Blog — see §10.
+### 7.5 Drafts — saved generations; each shows 6 copy buttons (one per format).
+### 7.6 Settings — Build tag; relay status + `🛠 INSTALL NEWS RELAY` + `🛰 FEEDS TEST` (+log box); AI key input + `💾 SAVE` + `🩺 TEST KEY` (+log box); GitHub token + `owner/repo` + SAVE; sound toggle; logged-in identity; last AI model; logout.
+
+---
+
+## 8. NEWS INGESTION PIPELINE
+
+### 8a. Monitored channels (display list, 26)
+World(10): Reuters, AP, BBC Breaking, CNN, Al Jazeera, Sky News, Bloomberg, AFP, The Guardian, NBC News.
+Africa(10): Africanews, News24 (SA), SABC News, Daily Nation (KE), Citizen Digital (KE), KTN News (KE), Daily Graphic (GH), TimesLIVE (SA), The Africa Report, Jeune Afrique.
+Nigeria(6): Channels Television, Arise News, TVC News, Punch, Premium Times, The Cable.
+
+### 8b. Actual feeds pulled (10)
+3 Google-News RSS aggregators (`https://news.google.com/rss/search?q=breaking+news[+africa|+nigeria]…`, cap 12 each; source name parsed from `"Title - Source"` suffix) + 7 direct feeds: BBC World (`feeds.bbci.co.uk/news/world/rss.xml`), Al Jazeera (`aljazeera.com/xml/rss/all.xml`), Channels TV (`channelstv.com/feed/`), Punch (`punchng.com/feed/`), Premium Times (`premiumtimesng.com/feed`), SABC (`sabcnews.com/sabcnews/feed/`), Daily Nation (`nation.africa/kenya/rss`), cap 8 each.
+
+### 8c. Relay (`api/feeds.js`, Vercel serverless, CommonJS `module.exports`)
+Fetch all 10 feeds **server-side in parallel** (8 s timeout each, custom User-Agent); parse RSS `<item>` (and Atom `<entry>` fallback) with regex; CDATA + entity decode; return `{ok:true, items:[{title,link,pub,region,flag,country,src,goog}]}`; header `Cache-Control: s-maxage=60, stale-while-revalidate=120`.
+
+### 8d. Client gather order
+1. `GET /api/feeds` (15 s timeout) → use if items.
+2. Else race 5 proxy routes **in parallel per feed** (9 s each): `api.allorigins.win/raw?url=`, `api.allorigins.win/get?url=` (parse `.contents`), `api.rss2json.com/v1/api.json?rss_url=`, `corsproxy.io/?url=`, `r.jina.ai/{feed}`.
+
+### 8e. Rules
+- Window: **last 24 h** (fallback: latest few).
+- Dedup by hash of link (`seen` list, cap 500, persisted).
+- Sort newest-first, cap 60 cards.
+- Interval 180 s; manual 🔄 anytime.
+- If relay returns 404 → toast hint to install relay; if everything fails → 3 sample cards (`🧪 SAMPLE`).
+
+---
+
+## 9. AI GENERATION ENGINE
+
+### 9a. Provider auto-detect & fallback
+- Key starts `gsk_` → **Groq** `https://api.groq.com/openai/v1/chat/completions`, models `llama-3.3-70b-versatile` → `llama-3.1-8b-instant`.
+- Else **xAI Grok** `https://api.x.ai/v1/chat/completions`, models `grok-3-mini` → `grok-3` → `grok-4` → `grok-2-latest`.
+- Try models in order until HTTP 200; 401/403 = hard stop "Key rejected"; `temperature 0.5`.
+- `🩺 TEST KEY` pings each model with `max_tokens:5` and prints exact server responses.
+
+### 9b. Input assembly
+`GENERATE`: user message = `SOURCE: {source}\nHEADLINE: {title}\nFULL TEXT:\n` + full article scraped via `https://r.jina.ai/{link}` (first 9,000 chars; fallback = headline).
+`REGENERATE`: prepends "take a clearly different angle (human vs institutional), never synonym swap" + previous FB text.
+
+### 9c. SYSTEM PROMPT (embed verbatim)
+> You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update")…
+> CORE RULES: treat source as facts only; rebuild from WHO/WHAT/WHERE/WHEN/WHY/HOW; never copy source sentences/structure; never invent facts/quotes/stats; label unverified; lead with the key confirmed development; short punchy sentences; human newsroom tone; banned phrases: "Furthermore, Moreover, In addition, It is worth noting, Interestingly, In today's rapidly changing world, This underscores"; no clickbait; facts→clarity→engagement; sensitive-events language ("police allege", "the suspect").
+> CREDIT RULE: `📰 Credit: {Source}`. SIGN-OFF: `📺 D-Ray Show — Your Daily Global Update.` HANDLES appended to social formats.
+> OUTPUT: ONLY a JSON object `{`…`}` with exactly 7 plain-text keys:
+> - `title`: crafted headline, ≤12 words, no emoji/clickbait.
+> - `fb`: line1 title; blank; 🚨 lead; "WHAT WE KNOW SO FAR:" •-bullets; "WHAT HAPPENS NEXT:"; credit; sign-off; follow CTA; 3–5 hashtags incl `#DRayShow`; Meta-policy safe.
+> - `tw`: ≤280 chars; fact + status + `📰 via {Source}` + ≤2 hashtags.
+> - `vo`: 30 s VO script; timecodes 0:00/0:08/0:16/0:22/0:27; [ON SCREEN] cues (red BREAKING strap + country + logo bug); fixed outro; [END CARD].
+> - `cm`: title line; WHY IT MATTERS; THE KEY QUESTION; OUR LINE AS A SHOW.
+> - `full`: professional medium blog article, 4–6 flowing paragraphs (~350–500 words); NO labels/headings inside; NO SEO/META/KEYWORDS lines; every fact intact.
+> - `ip`: 4:5 image prompt from facts only; brand hexes; logo top-left; BREAKING chip top-right; blue lower-third + red stripe + ≤6-word headline + tagline; `--ar 4:5`.
+
+### 9d. Output parsing (bulletproof)
+1. Strip code fences; try `JSON.parse` between first `{` and last `}`.
+2. Fallback: locate markers for keys `[title,fb,tw,vo,cm,full,ip]` via regex `["'\*\s\n{,]*KEY["'\*]*\s*:` (case-insensitive), sort by position, slice segments between markers.
+3. `cleanVal`: trim; strip surrounding quotes/backticks/asterisks; `\n` literals → newlines; collapse 3+ newlines.
+4. `stripBlog`: delete lines starting `SEO TITLE:/META DESCRIPTION:/KEYWORDS:`; strip prefixes like `THE NEWS:` etc. if ever printed.
+5. Enforce tweet ≤280 (word-boundary cut + …). Missing `title`/`fb` backfilled.
+
+---
+
+## 10. BLOG PUBLISHING ENGINE ("D-Ray Show Blog News")
+
+**Transport:** GitHub REST `PUT /repos/{owner}/{repo}/contents/{path}` with `Authorization: token {PAT}`; body `{message, content: base64, sha?}` (upsert: GET meta first, include `sha` if exists). Token (`repo` scope) + `owner/repo` stored on device.
+**Slug:** `title-slug-{base36 timestamp}`; URL `{origin}/blog/{slug}.html` (permanent; edits reuse slug so links never break).
+**Image upload:** file → canvas resize (max 1200 px) → JPEG q0.82 → base64 → commit `blog/img/{slug}.jpg`; `<img class="hero">` in post; reused on edit unless replaced.
+**Post page template:** light editorial theme; head = `<title>{headline} | D-Ray Show Blog News</title>`, meta description (first 160 chars of body), canonical, favicon, OG/Twitter tags (og:image = post image or logo), JSON-LD `NewsArticle`; body = brand header, H2 headline, meta line (date GMT • credit), hero image, paragraphs, dark credit box (credit + sign-off + handles + link to `/blog/`), footer strapline.
+**Index:** `blog/index.json` array of `{id,title,desc,source,img,date,url,body}`; newest first; also powers in-app Blog list and public homepage.
+**In-app Blog tab:** `✍ CREATE NEWS` composer (title, source, image file input with preview, story textarea, publish/update button) + published list with `🔗 COPY LINK • 📤 SHARE (navigator.share) • 🌐 OPEN • ️ EDIT` (edit prefills composer; UPDATE rewrites same slug). Desk's `📤 PUBLISH` sends generated `title`+`full` straight through.
+**Public homepage (`blog/index.html`):** brand header, search input (client-side filter), post cards from `index.json`, social footer.
+**SEO path:** per-post meta + JSON-LD + canonical + OG; submit site once to Google Search Console.
+
+---
+
+## 11. STORAGE SCHEMA (localStorage)
+
+`drs_user`, `drs_role`, `drs_key` (AI key), `drs_gh` (GitHub PAT), `drs_repo`, `drs_seen` (dedup hashes), `drs_drafts` (array of `{title,source,ts,out{title,fb,tw,vo,cm,full,ip}}`).
+
+---
+
+## 12. DIAGNOSTICS (must exist)
+
+- `🛰 FEEDS TEST`: reports `/api/feeds` HTTP status + item count (404 → "install relay"), plus status of 2 proxy routes.
+- `🩺 TEST KEY`: per-model HTTP status + raw error body.
+- Relay status chip in scanline/Settings; generation errors show exact API message; deploy verification via visible **Build vN** tag each release.
+
+---
+
+## 13. DEPLOYMENT RUNBOOK (phone-only)
+
+1. GitHub: create repo; add `index.html`, `manifest.json`, `sw.js`, upload `logo.png`; add `blog/index.html`.
+2. Vercel: import repo → Deploy (zero-config; `api/` becomes serverless automatically).
+3. App → Settings: save Grok/Groq key; save GitHub PAT (`repo` scope) + `owner/repo`; tap **🛠 INSTALL NEWS RELAY** (app writes `api/feeds.js` itself); wait ~20 s; 🔄.
+4. Add to Home Screen. Optional: Google Search Console verification.
+
+---
+
+## 14. CONSTRAINTS & ROADMAP
+
+Accepted trade-offs: client-side API keys (private 5-user tool), client-side PIN auth, public CORS proxies only as fallback. Known risks: proxy rate-limits (solved by relay), GitHub API rate (5k/h with token — fine), SW stale-cache (solved by network-first).
+Roadmap: push notifications, Supabase auth/roles enforcement, per-editor approval flow, Pidgin VO option, custom domain + sitemap auto-generation, more direct feeds.
