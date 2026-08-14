@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>D-Ray Show Newsroom</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A1220">
+<style>
+:root{--blue:#1E5AA8;--red:#D32F2F;--bg:#0A1220;--card:#101E36;--line:#1D2E4D;--green:#22C55E;--txt:#F4F7FB;--mut:#9FB0C7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:15px/1.55 Inter,system-ui,sans-serif;padding-bottom:80px}
+#login{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#login h1{color:#fff;margin-bottom:10px}#login p{color:var(--mut);margin-bottom:20px;text-align:center}
+input{background:#122442;color:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;width:100%;max-width:300px;margin-bottom:10px;font-size:16px}
+button{background:var(--red);color:#fff;border:0;border-radius:22px;padding:12px 24px;font-weight:800;font-size:15px;width:100%;max-width:300px}
+header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0D1930ee;border-bottom:1px solid var(--line)}
+.brand h1{font:800 17px Montserrat,Inter;letter-spacing:.4px}.brand b{color:var(--red)}
+main{max-width:640px;margin:0 auto;padding:14px 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.ready{display:inline-flex;align-items:center;gap:7px;font:800 11px Inter;color:var(--green);border:1.5px solid var(--green);border-radius:20px;padding:4px 11px;margin-bottom:9px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.card h3{font:800 17px/1.3 Montserrat;margin-bottom:6px}
+.meta{color:var(--mut);font:600 12px;margin-bottom:11px}
+.btns{display:flex;gap:9px;flex-wrap:wrap}
+.gen{background:var(--red);color:#fff;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:12px 0 8px}
+.tab{background:#122442;border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:7px 11px;font:700 11.5px Inter}
+.tab.on{background:var(--blue);color:#fff}
+.out{background:#0B1830;border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;font:400 13.5px/1.6 Inter;color:#DCE6F5;max-height:300px;overflow-y:auto}
+.copy{background:#BFD9F7;color:#0B2547;border:0;border-radius:16px;padding:6px 14px;font:800 11px Inter;margin-top:8px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 10.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button.on{color:var(--blue)}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0F2C1B;border:1px solid var(--green);color:#C9F5D8;border-radius:12px;padding:9px 16px;font:700 12.5px Inter;z-index:20;display:none}
+.spinner{width:20px;height:20px;border:3px solid #fff;border-bottom-color:transparent;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;margin-left:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>D-RAY SHOW</h1>
+  <p>Master Breaking News Editor</p>
+  <input id="user" placeholder="Username (e.g. admin1)">
+  <input id="pin" type="password" placeholder="PIN">
+  <button onclick="login()">ENTER NEWSROOM</button>
+</div>
+<header>
+  <div class="brand"><h1>D RAY <b>SHOW</b></h1></div>
+  <select id="region"><option value="all">🌐 All</option><option value="world">🌍 World</option><option value="africa">🌍 Africa</option><option value="nigeria">🇳 Nigeria</option></select>
+</header>
+<div id="toast"></div>
+<main id="view"></main>
+<nav>
+  <button data-act="nav" data-v="dash" class="on"><i>📈</i>Desk</button>
+  <button data-act="nav" data-v="settings"><i>⚙️</i>Settings</button>
+  <button data-act="refresh"><i>🔄</i>Fetch</button>
+</nav>
+
+<script>
+const USERS = {admin1:{pin:'1111'},admin2:{pin:'2222'},admin3:{pin:'3333'},editor1:{pin:'4444'},editor2:{pin:'5555'}};
+const state = {user:'',arrived:[],seen:JSON.parse(localStorage.getItem('seen')||'[]'),out:{},tab:{},apiKey:localStorage.getItem('groq_key')||''};
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/&/g,'&').replace(/</g,'<');
+function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3000)}
+
+const MASTER = `ROLE: Senior Breaking News Editor for D-Ray Show.
+OBJECTIVE: Transform the source text into completely original breaking news journalism.
+RULES: No spinning. Reconstruct from facts. Professional tone. No robotic AI phrases.
+HANDLES TO APPEND: IG: @dray.show | X: @show_ray2026 | YT: @drayshow-politicssport
+OUTPUT JSON KEYS: fb (FB/IG caption), tw (X Tweet max 280 chars), vo (30s Voice-over script), cm (Commentary), ip (AI Image prompt 4:5 brand colors #1E5AA8 #D32F2F)`;
+
+const FEEDS = [
+  {name:'🌍 World', url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en', region:'world'},
+  {name:'🌍 Africa', url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en', region:'africa'},
+  {name:'🇳 Nigeria', url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en', region:'nigeria'}
+];
+
+function login(){
+  const u=$('#user').value.toLowerCase(), p=$('#pin').value;
+  if(USERS[u] && USERS[u].pin===p){ state.user=u; $('#login').style.display='none'; render(); checkFeeds(); }
+  else toast('❌ Invalid User or PIN');
+}
+
+async function checkFeeds(){
+  if(!state.apiKey) return toast('⚠️ Add Groq API Key in Settings first');
+  for(const feed of FEEDS){
+    try{
+      const proxy='https://api.allorigins.win/get?url=';
+      const res=await fetch(proxy+encodeURIComponent(feed.url));
+      const data=await res.json();
+      const parser=new DOMParser();
+      const xml=parser.parseFromString(data.contents,'text/xml');
+      const items=xml.querySelectorAll('item');
+      if(items.length>0){
+        const top=items[0];
+        const title=top.querySelector('title').textContent;        const link=top.querySelector('link').textContent;
+        const id=btoa(link).slice(0,20);
+        if(!state.seen.includes(id)){
+          state.seen.push(id);
+          localStorage.setItem('seen',JSON.stringify(state.seen));
+          state.arrived.unshift({id,title,link,source:feed.name,region:feed.region,flag:feed.region==='nigeria'?'🇳':'🌍',loading:true});
+          render();
+          await processArticle(id,link);
+        }
+      }
+    }catch(e){console.error(e)}
+  }
+}
+
+async function processArticle(id,link){
+  try{
+    const jina=await fetch('https://r.jina.ai/'+link);
+    const fullText=await jina.text();
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${state.apiKey}`,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        response_format:{type:'json_object'},
+        messages:[{role:'system',content:MASTER},{role:'user',content:fullText.slice(0,8000)}]
+      })
+    });
+    const data=await res.json();
+    const parsed=JSON.parse(data.choices[0].message.content);
+    const item=state.arrived.find(i=>i.id===id);
+    item.loading=false; state.out[id]=parsed; render(); toast('🟢 READY — '+item.title);
+  }catch(e){
+    const item=state.arrived.find(i=>i.id===id);
+    item.loading=false; state.out[id]={fb:'AI Generation failed. Check API key in Settings.',tw:'',vo:'',cm:'',ip:''}; render();
+  }
+}
+
+const TABS=[['fb','FB/IG'],['tw','X Tweet'],['vo','Voice-Over'],['cm','Commentary'],['ip','Image']];
+function render(){
+  const list=state.arrived.filter(i=>state.region==='all'||i.region===$('#region').value);
+  $('#view').innerHTML=list.length ? list.map(i=>`
+    <div class="card">
+      ${i.loading ? '<div class="ready"><span class="spinner"></span> THINKING...</div>' : '<div class="ready"><span class="dot"></span>READY</div>'}
+      <h3>${i.title}</h3>
+      <div class="meta">Source: ${i.source}</div>
+      ${state.out[i.id] ? `<div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${state.tab[i.id]===k?'on':''}" data-id="${i.id}" data-t="${k}">${l}</button>`).join('')}</div><div class="out">${esc(state.out[i.id][state.tab[i.id]||'fb'])}</div><button class="copy" data-id="${i.id}">📋 COPY</button>` : ''}
+    </div>`).join('') : '<p style="text-align:center;color:var(--mut);padding:40px">Tap 🔄 Fetch to scan live global feeds.</p>';
+}
+
+document.addEventListener('click',e=>{  const b=e.target.closest('button,select');if(!b)return;
+  if(b.dataset.act==='nav'){document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.view=b.dataset.v;render()}
+  else if(b.dataset.act==='refresh'){checkFeeds()}
+  else if(b.dataset.t){state.tab[b.dataset.id]=b.dataset.t;render()}
+  else if(b.classList.contains('copy')){navigator.clipboard.writeText(state.out[b.dataset.id][state.tab[b.dataset.id]||'fb']);toast('✅ Copied!')}
+});
+$('#region').addEventListener('change',render);
+if(localStorage.getItem('drs_user')){state.user=localStorage.getItem('drs_user');$('#login').style.display='none';render();}
+</script>
+</body>
+</html>
