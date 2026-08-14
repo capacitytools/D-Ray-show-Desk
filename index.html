@@ -13,7 +13,7 @@ body{background:var(--bg);color:var(--txt);font:15px/1.55 Inter,system-ui,sans-s
 #login{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
 #login h1{font:800 26px Montserrat,Inter;letter-spacing:.5px}#login h1 b{color:var(--red2)}
 #login p{color:var(--mut);font:600 10px Inter;letter-spacing:2px;margin:4px 0 22px}
-input{background:#122442;color:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;width:100%;max-width:300px;margin-bottom:10px;font:600 15px Inter}
+input,textarea{background:#122442;color:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;width:100%;max-width:300px;margin-bottom:10px;font:600 15px Inter}
 header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0D1930ee;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
 .brand{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
 .brand h1{font:800 16px Montserrat,Inter;letter-spacing:.4px}.brand h1 b{color:var(--red2)}
@@ -37,17 +37,18 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 .btns{display:flex;gap:9px;flex-wrap:wrap}
 .gen{background:linear-gradient(180deg,var(--red2),var(--red));color:#fff;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter;box-shadow:0 4px 14px #d32f2f55}
 .re{background:#E8EDF4;color:#122442;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
+.pub{background:linear-gradient(180deg,var(--green),#16A34A);color:#fff;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
 .hd{background:#122442;border:1px solid var(--line);border-left:4px solid var(--red2);border-radius:10px;padding:10px 12px;font:800 14px/1.4 Montserrat,Inter;margin:12px 0 4px}
 .tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0 8px}
 .tab{flex:0 0 auto;background:#122442;border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:7px 11px;font:700 11.5px Inter}
 .tab.on{background:var(--blue);border-color:var(--blue2);color:#fff;box-shadow:0 0 12px #3f8edc66}
 .out{background:#0B1830;border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;font:400 13.5px/1.6 Inter;color:#DCE6F5;max-height:340px;overflow-y:auto}
-.row{display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px;gap:6px}
 .copy{background:#BFD9F7;color:#0B2547;border:0;border-radius:16px;padding:6px 14px;font:800 11px Inter}
 .save{background:none;border:1px solid var(--line);color:var(--mut);border-radius:16px;padding:6px 12px;font:700 11px Inter}
 .credit{text-align:right;color:var(--mut);font:600 11.5px Inter;margin-top:7px}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 10.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}nav button i{font-style:normal;font-size:17px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 9.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button i{font-style:normal;font-size:16px}
 nav button.on{color:var(--blue2)}
 .grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
 .src{display:flex;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font:600 13px Inter}
@@ -85,6 +86,7 @@ nav button.on{color:var(--blue2)}
 <button data-act="nav" data-v="dash" class="on"><i>📈</i>Desk</button>
 <button data-act="nav" data-v="alerts"><i>🔔</i>Alerts</button>
 <button data-act="nav" data-v="sources"><i>🌍</i>Sources</button>
+<button data-act="nav" data-v="blog"><i>📰</i>Blog</button>
 <button data-act="nav" data-v="drafts"><i>📄</i>Drafts</button>
 <button data-act="nav" data-v="set"><i>⚙️</i>Settings</button>
 </nav>
@@ -92,11 +94,11 @@ nav button.on{color:var(--blue2)}
 <script>
 const $=s=>document.querySelector(s);
 const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
-const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',scanning:false};
-const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<');
-const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
-const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
-function agoLabel(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));if(m<10)return'🔥 FRESH BREAKING';
+const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',scanning:false,blog:null,blogLoading:false,composing:false};
+const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
+function agoLabel(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));
+if(m<10)return'🔥 FRESH BREAKING';
 if(m<60)return m+'m ago';
 const h=Math.floor(m/60);
 if(h===1)return'1 hour ago';
@@ -116,24 +118,24 @@ CREDIT RULE (never skip): "📰 Credit: {Source Name}".
 BRAND SIGN-OFF: "📺 D-Ray Show — Your Daily Global Update."
 SOCIAL HANDLES to append at the end of social formats: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport
 
-OUTPUT: return ONLY a valid JSON object that STARTS with { and ENDS with } with exactly these 6 keys. Every value must be PLAIN TEXT: no markdown, no asterisks, no quotation marks around the value, no key labels inside the value, no code fences.
+OUTPUT: return ONLY a valid JSON object that STARTS with { and ENDS with } with exactly these 7 keys. Every value must be PLAIN TEXT: no markdown, no asterisks, no quotation marks around the value, no key labels inside the value, no code fences.
 "title": a perfectly crafted D-Ray headline — clear, specific, strong, search-friendly, no clickbait, no emoji, max 12 words.
-"fb": Facebook & Instagram post. Line 1 = the title. Blank line. Then 🚨 lead sentence. Then "WHAT WE KNOW SO FAR:" with short bullet lines starting with •. Then "WHAT HAPPENS NEXT:" one line. Then credit line, brand sign-off, "Follow for updates as this story develops.", then 3-5 hashtags including #DRayShow. Meta-policy safe: no engagement-bait, no hashtag spam.
+"fb": Facebook & Instagram post. Line 1 = the title. Blank line. Then 🚨 lead sentence. Then "WHAT WE KNOW SO FAR:" with short bullet lines starting with •. Then "WHAT HAPPENS NEXT:" one line. Then credit line, brand sign-off, "Follow for updates as this story develops.", then 3-5 hashtags including #DRayShow. Meta-policy safe.
 "tw": the tweet ONLY, maximum 280 characters: one fact + one status line + "📰 via {Source}" + max 2 hashtags.
 "vo": 30-second TikTok/YouTube voice-over script, plain spoken lines with timecodes: 0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro. Include [ON SCREEN] cues with red BREAKING strap + country + logo bug. Fixed outro: "Follow D-Ray Show — your daily global update." End with [END CARD: royal-blue frame, red stripe, YOUR DAILY GLOBAL UPDATE].
 "cm": commentary in plain blocks: line 1 the title, then WHY IT MATTERS: one short paragraph, THE KEY QUESTION: one line, OUR LINE AS A SHOW: one balanced sentence ending on the D-Ray standard.
+"full": the COMPLETE original news story written to the D-Ray Master Editorial Guide. Line 1 = BREAKING NEWS HEADLINE (strong, factual, search-friendly). Line 2 = SUBHEAD (one sentence of significance). Blank line. Then 4-6 short paragraphs in this order: THE NEWS (what happened immediately), KEY DETAIL (most important supporting information), CONTEXT (how the situation developed), RESPONSE (official statements if available, properly attributed), WHY IT MATTERS (broader significance), and a FINAL paragraph stating what is still unknown or what happens next. Do not write beyond the facts. After the paragraphs add exactly these three lines: "SEO TITLE: " + concise search-friendly title; "META DESCRIPTION: " + compelling 140-160 character summary; "KEYWORDS: " + 5-8 relevant search terms separated by commas.
 "ip": AI image generation prompt, 4:5 vertical: scene built ONLY from confirmed facts; photorealistic editorial style graded in royal blue #1E5AA8 and signal red #D32F2F; top-left D-Ray shield logo watermark; top-right red BREAKING chip; bottom-third royal-blue banner with thin red stripe, bold white headline max 6 words + tagline YOUR DAILY GLOBAL UPDATE; no third-party logos, no identifiable faces; end with --ar 4:5.
 REGENERATE rule: take a clearly different angle (human angle vs institutional angle), never a synonym swap.`;
 
-/* ---- 10 MONITORED CHANNELS: 3 region aggregators + 7 direct channel feeds ---- */
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
 {region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
 {region:'world',flag:'🌍',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
 {region:'world',flag:'🌍',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
-{region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
+{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
@@ -141,17 +143,15 @@ const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jaze
 
 function parseXML(t){const xml=new DOMParser().parseFromString(t,'text/xml');return[...xml.querySelectorAll('item')].map(n=>({title:(n.querySelector('title')||{}).textContent||'',link:(n.querySelector('link')||{}).textContent||'',pub:(n.querySelector('pubDate')||{}).textContent||''}))}
 function fetchT(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).finally(()=>clearTimeout(t))}
-/* all 3 proxy routes race in parallel — fastest winner, 9s timeout each */
 async function pull(f){
 const attempts=[
- (async()=>{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(),
- (async()=>{const r=await fetchT('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url),9000);const d=await r.json();if(!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))})(), (async()=>{const r=await fetchT('https://corsproxy.io/?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})()
+ (async()=>{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(), (async()=>{const r=await fetchT('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url),9000);const d=await r.json();if(!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))})(),
+ (async()=>{const r=await fetchT('https://corsproxy.io/?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})()
 ];
 const res=await Promise.allSettled(attempts);
 for(const r of res){if(r.status==='fulfilled'&&r.value&&r.value.length)return r.value}
 return[]}
 
-/* ---- SCAN ALL CHANNELS IN PARALLEL • WINDOW = LAST 24 HOURS • AUTO EVERY 3 MIN ---- */
 async function checkFeeds(){
 state.scanning=true;if(state.view==='dash')render();
 let found=0;
@@ -182,8 +182,8 @@ if(state.view==='dash'||state.view==='alerts')render()}
 
 function loadSamples(){
 if(state.sampled)return;state.sampled=true;
-[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
-{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳🇬',c:'Nigeria',r:'nigeria'},
+[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹',c:'Turkey',r:'world'},
+{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳',c:'Nigeria',r:'nigeria'},
 {t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
@@ -226,7 +226,7 @@ try{
  const s=t.indexOf('{'),e=t.lastIndexOf('}');
  if(s>-1&&e>s)return JSON.parse(t.slice(s,e+1));
 }catch(e){}
-const keys=['title','fb','tw','vo','cm','ip'];
+const keys=['title','fb','tw','vo','cm','full','ip'];
 const marks=[];
 for(const k of keys){
  const re=new RegExp('["\'\\*\\s\\n{,]*'+k+'["\'\\*]*\\s*:','i');
@@ -253,7 +253,7 @@ try{
  const r=await aiCall(userMsg);
  state.lastModel=r.prov+' / '+r.model;
  let out=parseAI(r.text)||{title:it.title,fb:r.text};
- ['title','fb','tw','vo','cm','ip'].forEach(k=>out[k]=cleanVal(out[k]));
+ ['title','fb','tw','vo','cm','full','ip'].forEach(k=>out[k]=cleanVal(out[k]));
  if(!out.title)out.title=it.title;
  if(!out.fb)out.fb=out.title;
  if(out.tw&&out.tw.length>280)out.tw=out.tw.slice(0,277).replace(/\s+\S*$/,'')+'…';
@@ -261,14 +261,50 @@ try{
  it.busy=false;toast(angle?'⟳ Fresh angle ready ('+r.model+')':'⚡ Generated via '+r.model);render();
 }catch(e){
  it.busy=false;it.error=true;
- state.out[id]={fb:'⚠️ Generation failed: '+e.message+' — open Settings, tap 🩺 TEST KEY and screenshot the log.',tw:'',vo:'',cm:'',ip:''};render();
+ state.out[id]={fb:'⚠️ Generation failed: '+e.message+' — open Settings, tap 🩺 TEST KEY and screenshot the log.',tw:'',vo:'',cm:'',full:'',ip:''};render();
 }}
 
-const TABS=[['fb','Facebook'],['tw','Twitter / X'],['vo','Voice-Over'],['cm','Commentary'],['ip','Image Prompt']];
+/* ================= D-RAY SHOW BLOG NEWS — PUBLISH ENGINE ================= */
+function ghPut(repo,path,content,sha,msg){
+const body={message:msg,content:btoa(unescape(encodeURIComponent(content)))};
+if(sha)body.sha=sha;
+return fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{'Authorization':'token '+state.ghToken.trim(),'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>{if(!r.ok)return r.text().then(t=>{throw new Error('GitHub '+r.status+' '+t.slice(0,90))});return r.json()})}
+function blogHTML(p){
+const paras=p.body.split(/\n{2,}/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).replace(/\n/g,'<br>')+'</p>').join('');
+const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.seoTitle,description:p.metaDesc,datePublished:new Date().toISOString(),author:{'@type':'Organization',name:'D-Ray Show'},publisher:{'@type':'Organization',name:'D-Ray Show Blog News',logo:{'@type':'ImageObject',url:location.origin+'/logo.png'}},mainEntityOfPage:p.url};
+return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.seoTitle)+' | D-Ray Show Blog News</title><meta name="description" content="'+esc(p.metaDesc)+'">'+(p.keywords?'<meta name="keywords" content="'+esc(p.keywords)+'">':'')+'<link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.seoTitle)+'"><meta property="og:description" content="'+esc(p.metaDesc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+location.origin+'/logo.png"><meta property="og:site_name" content="D-Ray Show Blog News"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+esc(p.seoTitle)+'"><meta name="twitter:description" content="'+esc(p.metaDesc)+'"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#F7F8FC;color:#101828}header{background:#0A1220;color:#fff;padding:18px 16px}header h1{margin:0;font:800 20px Arial}header h1 b{color:#E53935}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px}.sub{color:#5A6B85;font-style:italic;margin:0 0 4px}.meta{color:#8A97AB;font:12px Arial;margin-bottom:18px}p{margin:0 0 16px}.cred{background:#0A1220;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6}footer{color:#8A97AB;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#1E5AA8}</style></head><body><header><div class="wrap"><h1>D RAY <b>SHOW</b> BLOG NEWS</h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.head2||p.seoTitle)+'</h2>'+(p.sub?'<p class="sub">'+esc(p.sub)+'</p>':'')+'<p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • D-Ray Show Blog News</p>'+paras+'<div class="cred">📰 Credit: '+esc(p.source||'D-Ray Show')+'<br>📺 D-Ray Show — Your Daily Global Update.<br>Follow: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport • <a href="'+location.origin+'/blog/" style="color:#7FB4F5">Read more at D-Ray Show Blog News</a></div></main><footer>© D-Ray Show Blog News • Latest Updates. Global Coverage. Unbiased Reporting.</footer></body></html>'}
+async function publishToBlog(title,fullText,source){
+const repo=state.ghRepo.trim();
+if(!state.ghToken.trim()||!repo)throw new Error('Add GitHub token + repo in Settings first');
+let seoTitle=title,metaDesc='',keywords='';
+const bodyLines=[];
+fullText.split('\n').forEach(L=>{
+ if(/^SEO TITLE:/i.test(L))seoTitle=L.replace(/^SEO TITLE:/i,'').trim();
+ else if(/^META DESCRIPTION:/i.test(L))metaDesc=L.replace(/^META DESCRIPTION:/i,'').trim();
+ else if(/^KEYWORDS:/i.test(L))keywords=L.replace(/^KEYWORDS:/i,'').trim();
+ else bodyLines.push(L)});
+let body=bodyLines.slice();let head2='',sub='';
+if(body.length&&body[0].trim().length<90&&!/[.]$/.test(body[0].trim())){head2=body.shift().trim();
+ if(body.length&&body[0].trim().length<140&&body[0].trim().length>20){sub=body.shift().trim()}}
+if(!metaDesc)metaDesc=body.join(' ').replace(/\s+/g,' ').slice(0,150);
+const slug=(title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'post')+'-'+Date.now().toString(36);
+const url=location.origin+'/blog/'+slug+'.html';
+await ghPut(repo,'blog/'+slug+'.html',blogHTML({title,seoTitle,metaDesc,keywords,head2,sub,body:body.join('\n'),source,url}),null,'Publish: '+title);
+let idx=[],sha;
+try{const g=await fetch('https://api.github.com/repos/'+repo+'/contents/blog/index.json',{headers:{'Authorization':'token '+state.ghToken.trim(),'Accept':'application/vnd.github+json'}}).then(r=>{if(!r.ok)throw 0;return r.json()});idx=JSON.parse(decodeURIComponent(escape(atob(g.content.replace(/\n/g,'')))));sha=g.sha}catch(e){}
+idx.unshift({id:slug,title,desc:metaDesc,date:new Date().toISOString(),url,source:source||'D-Ray Show'});await ghPut(repo,'blog/index.json',JSON.stringify(idx,null,1),sha,'Update blog index');
+loadBlog();
+return url}
+async function loadBlog(){
+state.blogLoading=true;if(state.view==='blog')render();
+try{const r=await fetch('/blog/index.json');state.blog=r.ok?await r.json():[]}catch(e){state.blog=[]}
+state.blogLoading=false;if(state.view==='blog')render()}
+
+const TABS=[['fb','Facebook'],['tw','Twitter / X'],['vo','Voice-Over'],['cm','Commentary'],['full','Full Article'],['ip','Image Prompt']];
 function panelHTML(it){const t=state.tab[it.id]||'fb';const o=state.out[it.id];
 return `${o.title?`<div class="hd">📰 ${esc(o.title)}</div>`:''}
 <div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${t===k?'on':''}" data-act="tab" data-id="${it.id}" data-t="${k}">${l}</button>`).join('')}</div>
-<div class="row"><button class="save" data-act="save" data-id="${it.id}">💾 SAVE</button><button class="copy" data-act="copy" data-id="${it.id}">📋 COPY</button></div>
+<div class="row"><button class="save" data-act="save" data-id="${it.id}">💾 SAVE</button><button class="pub" data-act="publish" data-id="${it.id}">📤 PUBLISH</button><button class="copy" data-act="copy" data-id="${it.id}">📋 COPY</button></div>
 <div class="out">${esc(o[t]||'')}</div><div class="credit">Credit: ${esc(it.source)}</div>`}
 function cardHTML(it){
 const badge=it.busy?'<div class="ready busyb"><span class="spinner"></span>AI WRITING…</div>':(it.error?'<div class="ready errb">⚠ RETRY BELOW</div>':'<div class="ready"><span class="dot"></span>READY</div>');
@@ -280,28 +316,37 @@ function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v6 • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels (World • Africa • Nigeria)…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v7 • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels (World • Africa • Nigeria)…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
+<div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ CREATE NEWS</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
+${state.composing?`<div class="card"><input id="cTitle" placeholder="Headline / Title" style="max-width:none"><input id="cSource" placeholder="Source / Credit (e.g. Reuters)" style="max-width:none"><textarea id="cBody" rows="8" placeholder="Write the full story here… (or use 📤 PUBLISH on a generated Full Article from the Desk)" style="max-width:none;font:400 14px/1.6 Inter"></textarea><button class="pub" style="width:100%" data-act="pubmanual">🚀 PUBLISH TO BLOG</button></div>`:''}
+${state.blogLoading?'<div class="empty">Loading published posts…</div>':(state.blog&&state.blog.length?state.blog.map((p,i)=>`<div class="card"><h3>${esc(p.title)}</h3><div class="meta">${new Date(p.date).toUTCString().slice(0,22)} GMT${p.source?' • Source: '+esc(p.source):''}</div><div class="btns"><button class="copy" data-act="blogcopy" data-i="${i}">🔗 COPY LINK</button><button class="save" data-act="blogshare" data-i="${i}">📤 SHARE</button><button class="save" data-act="blogopen" data-i="${i}">🌐 OPEN</button></div></div>`).join(''):'<div class="empty">Nothing published yet.<br>Generate a story and tap 📤 PUBLISH, or tap ✍ CREATE NEWS.</div>')}`;return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card">${d.out&&d.out.title?`<div class="hd">📰 ${esc(d.out.title)}</div>`:''}<h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
 if(v==='set'){$('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v6</em></div>
-<div class="set"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected • stored only on this phone</span></div>
+<div class="set"><span>🏗 Build</span><em>v7</em></div>
+<div class="set"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected</span></div>
 <input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-... or gsk-..." style="max-width:none">
 <button class="gen" style="width:100%" data-act="savekey">💾 SAVE KEY</button>
 <button class="re" style="width:100%;margin-top:8px" data-act="testkey">🩺 TEST KEY</button>
 ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}</div>`:''}
-<div class="set" style="margin-top:10px"><span>🔔 Sound on new break</span><input type="checkbox" data-set="sound" ${state.sound?'checked':''} style="width:auto;margin:0"></div>
-<div class="set"><span>👤 Logged in</span><em>${esc(state.user)} (${esc(state.role)})</em></div><div class="set"><span>🤖 Last AI model used</span><em>${esc(state.lastModel||'—')}</em></div>
+<div class="set" style="margin-top:10px"><span>🐙 GitHub Token (repo scope) — powers Blog publishing</span></div>
+<input id="ghToken" type="password" value="${esc(state.ghToken)}" placeholder="ghp_..." style="max-width:none">
+<input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="username/repo-name (this app's repo)" style="max-width:none">
+<button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
+<div class="empty" style="padding:8px 10px">Token: GitHub → Settings → Developer settings → Personal access tokens → generate (repo scope).</div>
+<div class="set"><span>🔔 Sound on new break</span><input type="checkbox" data-set="sound" ${state.sound?'checked':''} style="width:auto;margin:0"></div>
+<div class="set"><span>👤 Logged in</span><em>${esc(state.user)} (${esc(state.role)})</em></div>
+<div class="set"><span>🤖 Last AI model</span><em>${esc(state.lastModel||'—')}</em></div>
 <button class="re" style="width:100%" data-act="logout">🚪 LOG OUT</button>
 <div class="empty">Staff: 3 Admins • 2 Editors • Host: Vercel</div>`}}
-
 document.addEventListener('click',e=>{
 const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
  if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
  else toast('❌ Invalid username or PIN');return}
-if(d.act==='nav'){state.view=d.v;render();return}
+if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
 if(d.act==='refresh'){toast('🔄 Scanning all channels…');checkFeeds();return}
 if(d.act==='gen'){gen(d.id,false);return}
 if(d.act==='regen'){gen(d.id,true);return}
@@ -309,7 +354,21 @@ if(d.act==='tab'){state.tab[d.id]=d.t;render();return}
 if(d.act==='copy'){navigator.clipboard.writeText(state.out[d.id][state.tab[d.id]||'fb']).then(()=>toast('✅ Copied!'));return}
 if(d.act==='copyraw'){navigator.clipboard.writeText(state.drafts[d.i].out[d.t]).then(()=>toast('✅ Copied!'));return}
 if(d.act==='save'){const it=state.arrived.find(x=>x.id===d.id);state.drafts.unshift({title:it.title,source:it.source,ts:fmt(it.ts),out:state.out[it.id]});localStorage.setItem('drs_drafts',JSON.stringify(state.drafts));toast('💾 Saved to Drafts');render();return}
+if(d.act==='publish'){const it=state.arrived.find(x=>x.id===d.id);const o=state.out[d.id];
+ if(!o||!o.full)return toast('⚡ Generate first — Full Article tab');
+ toast('📤 Publishing…');
+ publishToBlog(o.title||it.title,o.full,it.source).then(u=>toast('🚀 LIVE! Link in Blog tab')).catch(er=>toast('⚠️ '+er.message));return}
+if(d.act==='compose'){state.composing=!state.composing;render();return}
+if(d.act==='pubmanual'){const t=$('#cTitle').value.trim(),bo=$('#cBody').value.trim(),so=$('#cSource').value.trim();
+ if(!t||!bo)return toast('⚠️ Title + story required');
+ toast('📤 Publishing…');
+ publishToBlog(t,bo,so||'D-Ray Show').then(()=>{state.composing=false;toast('🚀 LIVE! Link in Blog tab');render()}).catch(er=>toast('⚠️ '+er.message));return}
+if(d.act==='blogrefresh'){loadBlog();return}
+if(d.act==='blogcopy'){navigator.clipboard.writeText(state.blog[d.i].url).then(()=>toast('🔗 Link copied!'));return}
+if(d.act==='blogshare'){const p=state.blog[d.i];if(navigator.share)navigator.share({title:p.title,url:p.url}).catch(()=>{});else navigator.clipboard.writeText(p.url).then(()=>toast('🔗 Link copied!'));return}
+if(d.act==='blogopen'){window.open(state.blog[d.i].url,'_blank');return}
 if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
+if(d.act==='savegh'){state.ghToken=$('#ghToken').value.trim();state.ghRepo=$('#ghRepo').value.trim();localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);toast('✅ GitHub saved for Blog publishing');return}
 if(d.act==='testkey'){testKey();return}
 if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
 if(d.act==='sample'){loadSamples();return}
@@ -318,7 +377,7 @@ document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.set
 $('#region').addEventListener('change',e=>{state.region=e.target.value;render()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 let started=false;
-function start(){if(started)return;started=true;render();checkFeeds();setInterval(checkFeeds,180000)}
+function start(){if(started)return;started=true;render();checkFeeds();loadBlog();setInterval(checkFeeds,180000)}
 if(state.user){$('#login').style.display='none';start()}
 </script>
 </body>
