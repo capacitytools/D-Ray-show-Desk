@@ -34,6 +34,7 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 .meta{color:var(--mut);font:600 12px Inter;margin-bottom:11px}
 .fresh{color:var(--red2);font-weight:800}
 .chipS{color:#F5B841;border:1px solid #F5B841;border-radius:8px;padding:1px 6px;font-size:10px}
+.chipE{color:var(--blue2);border:1px solid var(--blue2);border-radius:8px;padding:1px 6px;font-size:10px}
 .btns{display:flex;gap:9px;flex-wrap:wrap}
 .gen{background:linear-gradient(180deg,var(--red2),var(--red));color:#fff;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter;box-shadow:0 4px 14px #d32f2f55}
 .re{background:#E8EDF4;color:#122442;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
@@ -46,8 +47,8 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 .row{display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px;gap:6px}
 .copy{background:#BFD9F7;color:#0B2547;border:0;border-radius:16px;padding:6px 14px;font:800 11px Inter}
 .save{background:none;border:1px solid var(--line);color:var(--mut);border-radius:16px;padding:6px 12px;font:700 11px Inter}
-.credit{text-align:right;color:var(--mut);font:600 11.5px Inter;margin-top:7px}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 9.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
+.credit{text-align:right;color:var(--mut);font:600 11.5px Inter;margin-top:7px}nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 9.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
 nav button i{font-style:normal;font-size:16px}
 nav button.on{color:var(--blue2)}
 .grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
@@ -94,9 +95,10 @@ nav button.on{color:var(--blue2)}
 <script>
 const $=s=>document.querySelector(s);
 const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
-const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',scanning:false,blog:null,blogLoading:false,composing:false,relay:false};
-const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
-const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
+const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',scanning:false,blog:null,blogLoading:false,composing:false,editing:null,pendingImg:null,relay:false};
+const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
+const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
+const b64t=s=>btoa(unescape(encodeURIComponent(s)));
 function agoLabel(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));
 if(m<10)return'🔥 FRESH BREAKING';
 if(m<60)return m+'m ago';
@@ -124,35 +126,34 @@ OUTPUT: return ONLY a valid JSON object that STARTS with { and ENDS with } with 
 "tw": the tweet ONLY, maximum 280 characters: one fact + one status line + "📰 via {Source}" + max 2 hashtags.
 "vo": 30-second TikTok/YouTube voice-over script, plain spoken lines with timecodes: 0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro. Include [ON SCREEN] cues with red BREAKING strap + country + logo bug. Fixed outro: "Follow D-Ray Show — your daily global update." End with [END CARD: royal-blue frame, red stripe, YOUR DAILY GLOBAL UPDATE].
 "cm": commentary in plain blocks: line 1 the title, then WHY IT MATTERS: one short paragraph, THE KEY QUESTION: one line, OUR LINE AS A SHOW: one balanced sentence ending on the D-Ray standard.
-"full": the COMPLETE original news story written to the D-Ray Master Editorial Guide. Line 1 = BREAKING NEWS HEADLINE (strong, factual, search-friendly). Line 2 = SUBHEAD (one sentence of significance). Blank line. Then 4-6 short paragraphs in this order: THE NEWS (what happened immediately), KEY DETAIL (most important supporting information), CONTEXT (how the situation developed), RESPONSE (official statements if available, properly attributed), WHY IT MATTERS (broader significance), and a FINAL paragraph stating what is still unknown or what happens next. Do not write beyond the facts. After the paragraphs add exactly these three lines: "SEO TITLE: " + concise search-friendly title; "META DESCRIPTION: " + compelling 140-160 character summary; "KEYWORDS: " + 5-8 relevant search terms separated by commas.
+"full": a professional, medium-length blog news article of 4-6 flowing paragraphs (about 350-500 words). Write it exactly like a human journalist's blog post: paragraph 1 states the news immediately; the following paragraphs weave in the key details, background context, properly attributed statements and why it matters; the final paragraph states what is still unknown or what happens next. ABSOLUTELY NO labels or headings inside (never write "BREAKING NEWS HEADLINE:", "SUBHEAD:", "THE NEWS:", "KEY DETAIL:", "CONTEXT:", "RESPONSE:", "WHY IT MATTERS:", "FINAL:"). ABSOLUTELY NO "SEO TITLE", NO "META DESCRIPTION", NO "KEYWORDS". Just clean paragraphs separated by blank lines, every fact intact, nothing invented.
 "ip": AI image generation prompt, 4:5 vertical: scene built ONLY from confirmed facts; photorealistic editorial style graded in royal blue #1E5AA8 and signal red #D32F2F; top-left D-Ray shield logo watermark; top-right red BREAKING chip; bottom-third royal-blue banner with thin red stripe, bold white headline max 6 words + tagline YOUR DAILY GLOBAL UPDATE; no third-party logos, no identifiable faces; end with --ar 4:5.
 REGENERATE rule: take a clearly different angle (human angle vs institutional angle), never a synonym swap.`;
 
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
-{region:'nigeria',flag:'🇳',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
+{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
 {region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
-{region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
+{region:'world',flag:'🇶',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
 
 function parseXML(t){const xml=new DOMParser().parseFromString(t,'text/xml');return[...xml.querySelectorAll('item')].map(n=>({title:(n.querySelector('title')||{}).textContent||'',link:(n.querySelector('link')||{}).textContent||'',pub:(n.querySelector('pubDate')||{}).textContent||''}))}
 function fetchT(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).finally(()=>clearTimeout(t))}
-async function pull(f){
-const attempts=[
- (async()=>{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(), (async()=>{const r=await fetchT('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url),9000);const d=await r.json();if(!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))})(),
+async function pull(f){const attempts=[
+ (async()=>{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(),
+ (async()=>{const r=await fetchT('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url),9000);const d=await r.json();if(!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))})(),
  (async()=>{const r=await fetchT('https://corsproxy.io/?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})()
 ];
 const res=await Promise.allSettled(attempts);
 for(const r of res){if(r.status==='fulfilled'&&r.value&&r.value.length)return r.value}
 return[]}
 
-/* ---- v8: PRIMARY route = your own Vercel relay (/api/feeds); fallback = proxies ---- */
 async function gather(){
 try{
  const r=await fetchT('/api/feeds',15000);
@@ -193,8 +194,8 @@ if(state.view==='dash'||state.view==='alerts')render()}
 
 function loadSamples(){
 if(state.sampled)return;state.sampled=true;
-[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
-{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳',c:'Nigeria',r:'nigeria'},{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
+[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹',c:'Turkey',r:'world'},{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳🇬',c:'Nigeria',r:'nigeria'},
+{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰',c:'Kenya',r:'africa'}]
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
 
@@ -230,6 +231,9 @@ state.testLog=log.join('\n');toast('❌ Key failed all models — see log in Set
 }
 
 const cleanVal=s=>String(s||'').trim().replace(/^["'`*]+/,'').replace(/["'`*]+$/,'').replace(/\\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+/* strips any stray internal labels if the model ever prints them */
+const LAB=/^(BREAKING NEWS HEADLINE|SUBHEAD|THE NEWS|KEY DETAIL|CONTEXT|RESPONSE|WHY IT MATTERS|FINAL)\s*:\s*/i;
+function stripBlog(s){return String(s||'').split('\n').map(L=>L.replace(LAB,'')).filter(L=>!/^(SEO TITLE|META DESCRIPTION|KEYWORDS)\s*:/i.test(L)).join('\n').replace(/\n{3,}/g,'\n\n').trim()}
 function parseAI(txt){
 let t=txt.trim();
 if(t.startsWith('```')){t=t.replace(/^```[a-z]*\n?/,'').replace(/```$/,'').trim()}
@@ -239,11 +243,11 @@ try{
 }catch(e){}
 const keys=['title','fb','tw','vo','cm','full','ip'];
 const marks=[];
-for(const k of keys){
- const re=new RegExp('["\'\\*\\s\\n{,]*'+k+'["\'\\*]*\\s*:','i');
+for(const k of keys){ const re=new RegExp('["\'\\*\\s\\n{,]*'+k+'["\'\\*]*\\s*:','i');
  const m=re.exec(t);
  if(m)marks.push({k,s:m.index,e:m.index+m[0].length});
-}if(marks.length<2)return null;
+}
+if(marks.length<2)return null;
 marks.sort((a,b)=>a.s-b.s);
 const obj={};
 for(let i=0;i<marks.length;i++){
@@ -265,6 +269,7 @@ try{
  state.lastModel=r.prov+' / '+r.model;
  let out=parseAI(r.text)||{title:it.title,fb:r.text};
  ['title','fb','tw','vo','cm','full','ip'].forEach(k=>out[k]=cleanVal(out[k]));
+ out.full=stripBlog(out.full);
  if(!out.title)out.title=it.title;
  if(!out.fb)out.fb=out.title;
  if(out.tw&&out.tw.length>280)out.tw=out.tw.slice(0,277).replace(/\s+\S*$/,'')+'…';
@@ -275,35 +280,36 @@ try{
  state.out[id]={fb:'⚠️ Generation failed: '+e.message+' — open Settings, tap 🩺 TEST KEY and screenshot the log.',tw:'',vo:'',cm:'',full:'',ip:''};render();
 }}
 
-/* ---- BLOG PUBLISH ENGINE ---- */
-function ghPut(repo,path,content,sha,msg){
-const body={message:msg,content:btoa(unescape(encodeURIComponent(content)))};
-if(sha)body.sha=sha;
-return fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{'Authorization':'token '+state.ghToken.trim(),'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>{if(!r.ok)return r.text().then(t=>{throw new Error('GitHub '+r.status+' '+t.slice(0,90))});return r.json()})}
+/* ================= BLOG ENGINE v9: image upload + edit after publish ================= */
+function ghAuth(){return{'Authorization':'token '+state.ghToken.trim(),'Accept':'application/vnd.github+json'}}
+async function ghGetMeta(repo,path){try{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{headers:ghAuth()});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+async function ghUpsert(repo,path,b64,msg){
+const meta=await ghGetMeta(repo,path);
+const body={message:msg,content:b64};
+if(meta&&meta.sha)body.sha=meta.sha;
+const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{...ghAuth(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+if(!r.ok){const t=await r.text();throw new Error('GitHub '+r.status+' '+t.slice(0,90))}
+return r.json()}
+function fileToB64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,1200/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.82).split(',')[1])};img.onerror=rej;img.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
 function blogHTML(p){
-const paras=p.body.split(/\n{2,}/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).replace(/\n/g,'<br>')+'</p>').join('');
-const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.seoTitle,description:p.metaDesc,datePublished:new Date().toISOString(),author:{'@type':'Organization',name:'D-Ray Show'},publisher:{'@type':'Organization',name:'D-Ray Show Blog News',logo:{'@type':'ImageObject',url:location.origin+'/logo.png'}},mainEntityOfPage:p.url};
-return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.seoTitle)+' | D-Ray Show Blog News</title><meta name="description" content="'+esc(p.metaDesc)+'">'+(p.keywords?'<meta name="keywords" content="'+esc(p.keywords)+'">':'')+'<link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.seoTitle)+'"><meta property="og:description" content="'+esc(p.metaDesc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+location.origin+'/logo.png"><meta property="og:site_name" content="D-Ray Show Blog News"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+esc(p.seoTitle)+'"><meta name="twitter:description" content="'+esc(p.metaDesc)+'"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#F7F8FC;color:#101828}header{background:#0A1220;color:#fff;padding:18px 16px}header h1{margin:0;font:800 20px Arial}header h1 b{color:#E53935}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px}.sub{color:#5A6B85;font-style:italic;margin:0 0 4px}.meta{color:#8A97AB;font:12px Arial;margin-bottom:18px}p{margin:0 0 16px}.cred{background:#0A1220;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6}footer{color:#8A97AB;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#1E5AA8}</style></head><body><header><div class="wrap"><h1>D RAY <b>SHOW</b> BLOG NEWS</h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.head2||p.seoTitle)+'</h2>'+(p.sub?'<p class="sub">'+esc(p.sub)+'</p>':'')+'<p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • D-Ray Show Blog News</p>'+paras+'<div class="cred">📰 Credit: '+esc(p.source||'D-Ray Show')+'<br>📺 D-Ray Show — Your Daily Global Update.<br>Follow: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport • <a href="'+location.origin+'/blog/" style="color:#7FB4F5">Read more at D-Ray Show Blog News</a></div></main><footer>© D-Ray Show Blog News • Latest Updates. Global Coverage. Unbiased Reporting.</footer></body></html>'}
-async function publishToBlog(title,fullText,source){
+const paras=p.body.split(/\n{2,}/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).replace(/\n/g,'<br>')+'</p>').join('');const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.title,description:p.desc,datePublished:new Date().toISOString(),author:{'@type':'Organization',name:'D-Ray Show'},publisher:{'@type':'Organization',name:'D-Ray Show Blog News'},mainEntityOfPage:p.url};
+return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.title)+' | D-Ray Show Blog News</title><meta name="description" content="'+esc(p.desc)+'"><link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.title)+'"><meta property="og:description" content="'+esc(p.desc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+(p.img||location.origin+'/logo.png')+'"><meta property="og:site_name" content="D-Ray Show Blog News"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#F7F8FC;color:#101828}header{background:#0A1220;color:#fff;padding:18px 16px}header h1{margin:0;font:800 20px Arial}header h1 b{color:#E53935}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px}.meta{color:#8A97AB;font:12px Arial;margin-bottom:14px}img.hero{width:100%;border-radius:12px;margin:0 0 18px}p{margin:0 0 16px}.cred{background:#0A1220;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6}footer{color:#8A97AB;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#1E5AA8}</style></head><body><header><div class="wrap"><h1>D RAY <b>SHOW</b> BLOG NEWS</h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.title)+'</h2><p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • D-Ray Show Blog News</p>'+(p.img?'<img class="hero" src="'+p.img+'" alt="'+esc(p.title)+'">':'')+paras+'<div class="cred">📰 Credit: '+esc(p.source||'D-Ray Show')+'<br>📺 D-Ray Show — Your Daily Global Update.<br>Follow: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport • <a href="'+location.origin+'/blog/" style="color:#7FB4F5">Read more at D-Ray Show Blog News</a></div></main><footer>© D-Ray Show Blog News • Latest Updates. Global Coverage. Unbiased Reporting.</footer></body></html>'}
+async function publishToBlog(title,bodyText,source,o){
+o=o||{};
 const repo=state.ghRepo.trim();
 if(!state.ghToken.trim()||!repo)throw new Error('Add GitHub token + repo in Settings first');
-let seoTitle=title,metaDesc='',keywords='';
-const bodyLines=[];
-fullText.split('\n').forEach(L=>{
- if(/^SEO TITLE:/i.test(L))seoTitle=L.replace(/^SEO TITLE:/i,'').trim();
- else if(/^META DESCRIPTION:/i.test(L))metaDesc=L.replace(/^META DESCRIPTION:/i,'').trim();
- else if(/^KEYWORDS:/i.test(L))keywords=L.replace(/^KEYWORDS:/i,'').trim(); else bodyLines.push(L)});
-let body=bodyLines.slice();let head2='',sub='';
-if(body.length&&body[0].trim().length<90&&!/[.]$/.test(body[0].trim())){head2=body.shift().trim();
- if(body.length&&body[0].trim().length<140&&body[0].trim().length>20){sub=body.shift().trim()}}
-if(!metaDesc)metaDesc=body.join(' ').replace(/\s+/g,' ').slice(0,150);
-const slug=(title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'post')+'-'+Date.now().toString(36);
+const slug=o.edit?o.edit.id:((title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'post')+'-'+Date.now().toString(36));
+let img=(o.edit&&o.edit.img)?o.edit.img:'';
+if(o.imgB64){await ghUpsert(repo,'blog/img/'+slug+'.jpg',o.imgB64,'Image: '+title);img=location.origin+'/blog/img/'+slug+'.jpg'}
+const desc=bodyText.replace(/\s+/g,' ').slice(0,160);
 const url=location.origin+'/blog/'+slug+'.html';
-await ghPut(repo,'blog/'+slug+'.html',blogHTML({title,seoTitle,metaDesc,keywords,head2,sub,body:body.join('\n'),source,url}),null,'Publish: '+title);
-let idx=[],sha;
-try{const g=await fetch('https://api.github.com/repos/'+repo+'/contents/blog/index.json',{headers:{'Authorization':'token '+state.ghToken.trim(),'Accept':'application/vnd.github+json'}}).then(r=>{if(!r.ok)throw 0;return r.json()});idx=JSON.parse(decodeURIComponent(escape(atob(g.content.replace(/\n/g,'')))));sha=g.sha}catch(e){}
-idx.unshift({id:slug,title,desc:metaDesc,date:new Date().toISOString(),url,source:source||'D-Ray Show'});
-await ghPut(repo,'blog/index.json',JSON.stringify(idx,null,1),sha,'Update blog index');
+await ghUpsert(repo,'blog/'+slug+'.html',b64t(blogHTML({title,desc,source,img,body:bodyText,url})),'Publish: '+title);
+const meta=await ghGetMeta(repo,'blog/index.json');
+let idx=[];if(meta&&meta.content){try{idx=JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/\n/g,'')))))}catch(e){}}
+const old=idx.find(pp=>pp.id===slug);
+const entry={id:slug,title,desc,source:source||'D-Ray Show',img,date:old?old.date:new Date().toISOString(),url,body:bodyText};
+if(old)idx[idx.indexOf(old)]=entry;else idx.unshift(entry);
+await ghUpsert(repo,'blog/index.json',b64t(JSON.stringify(idx,null,1)),'Update blog index');
 loadBlog();
 return url}
 async function loadBlog(){
@@ -327,21 +333,27 @@ function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v8 • relay: ${state.relay?'⚡ Vercel':'🌐 proxy'} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels (World • Africa • Nigeria)…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v9 • relay: ${state.relay?'⚡ Vercel':'🌐 proxy'} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels (World • Africa • Nigeria)…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
-<div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ CREATE NEWS</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
-${state.composing?`<div class="card"><input id="cTitle" placeholder="Headline / Title" style="max-width:none"><input id="cSource" placeholder="Source / Credit (e.g. Reuters)" style="max-width:none"><textarea id="cBody" rows="8" placeholder="Write the full story here… (or use 📤 PUBLISH on a generated Full Article from the Desk)" style="max-width:none;font:400 14px/1.6 Inter"></textarea><button class="pub" style="width:100%" data-act="pubmanual">🚀 PUBLISH TO BLOG</button></div>`:''}
-${state.blogLoading?'<div class="empty">Loading published posts…</div>':(state.blog&&state.blog.length?state.blog.map((p,i)=>`<div class="card"><h3>${esc(p.title)}</h3><div class="meta">${new Date(p.date).toUTCString().slice(0,22)} GMT${p.source?' • Source: '+esc(p.source):''}</div><div class="btns"><button class="copy" data-act="blogcopy" data-i="${i}">🔗 COPY LINK</button><button class="save" data-act="blogshare" data-i="${i}">📤 SHARE</button><button class="save" data-act="blogopen" data-i="${i}">🌐 OPEN</button></div></div>`).join(''):'<div class="empty">Nothing published yet.<br>Generate a story and tap 📤 PUBLISH, or tap ✍ CREATE NEWS.</div>')}`;return}
+<div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ ${state.composing?'✖ CLOSE':'CREATE NEWS'}</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
+${state.composing?`<div class="card">${state.editing?'<div class="hd">✏️ EDITING: '+esc(state.editing.title)+'</div>':''}
+<input id="cTitle" placeholder="Headline / Title" style="max-width:none" value="${esc(state.editing?state.editing.title:'')}">
+<input id="cSource" placeholder="Source / Credit (e.g. Reuters)" style="max-width:none" value="${esc(state.editing?state.editing.source:'')}">
+<input type="file" id="cImg" accept="image/*" style="max-width:none;background:#0B1830">${state.pendingImg?`<img src="data:image/jpeg;base64,${state.pendingImg}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">`:(state.editing&&state.editing.img?`<img src="${state.editing.img}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">`:'')}
+<textarea id="cBody" rows="10" placeholder="Write the full story here… (or use 📤 PUBLISH on a generated Full Article from the Desk)" style="max-width:none;font:400 14px/1.6 Inter">${esc(state.editing?state.editing.body:'')}</textarea>
+<button class="pub" style="width:100%" data-act="pubmanual">🚀 ${state.editing?'UPDATE POST':'PUBLISH TO BLOG'}</button></div>`:''}
+${state.blogLoading?'<div class="empty">Loading published posts…</div>':(state.blog&&state.blog.length?state.blog.map((p,i)=>`<div class="card"><h3>${esc(p.title)}</h3><div class="meta">${new Date(p.date).toUTCString().slice(0,22)} GMT${p.source?' • Source: '+esc(p.source):''}</div><div class="btns"><button class="copy" data-act="blogcopy" data-i="${i}">🔗 COPY LINK</button><button class="save" data-act="blogshare" data-i="${i}">📤 SHARE</button><button class="save" data-act="blogopen" data-i="${i}">🌐 OPEN</button><button class="save" data-act="blogedit" data-i="${i}">✏️ EDIT</button></div></div>`).join(''):'<div class="empty">Nothing published yet.<br>Generate a story and tap 📤 PUBLISH, or tap ✍ CREATE NEWS.</div>')}`;return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card">${d.out&&d.out.title?`<div class="hd">📰 ${esc(d.out.title)}</div>`:''}<h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
 if(v==='set'){$('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v8</em></div>
+<div class="set"><span>🏗 Build</span><em>v9</em></div>
 <div class="set"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected</span></div>
 <input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-... or gsk-..." style="max-width:none">
 <button class="gen" style="width:100%" data-act="savekey">💾 SAVE KEY</button>
 <button class="re" style="width:100%;margin-top:8px" data-act="testkey">🩺 TEST KEY</button>
-${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}</div>`:''}<div class="set" style="margin-top:10px"><span>🐙 GitHub Token (repo scope) — powers Blog publishing</span></div>
+${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}</div>`:''}
+<div class="set" style="margin-top:10px"><span>🐙 GitHub Token (repo scope) — powers Blog publishing</span></div>
 <input id="ghToken" type="password" value="${esc(state.ghToken)}" placeholder="ghp_..." style="max-width:none">
 <input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="username/repo-name (this app's repo)" style="max-width:none">
 <button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
@@ -369,26 +381,30 @@ if(d.act==='publish'){const it=state.arrived.find(x=>x.id===d.id);const o=state.
  if(!o||!o.full)return toast('⚡ Generate first — Full Article tab');
  toast('📤 Publishing…');
  publishToBlog(o.title||it.title,o.full,it.source).then(()=>toast('🚀 LIVE! Link in Blog tab')).catch(er=>toast('⚠️ '+er.message));return}
-if(d.act==='compose'){state.composing=!state.composing;render();return}
-if(d.act==='pubmanual'){const t=$('#cTitle').value.trim(),bo=$('#cBody').value.trim(),so=$('#cSource').value.trim();
+if(d.act==='compose'){state.composing=!state.composing;if(!state.composing){state.editing=null;state.pendingImg=null}render();return}
+if(d.act==='pubmanual'){const t=$('#cTitle').value.trim(),bo=stripBlog($('#cBody').value.trim()),so=$('#cSource').value.trim();
  if(!t||!bo)return toast('⚠️ Title + story required');
  toast('📤 Publishing…');
- publishToBlog(t,bo,so||'D-Ray Show').then(()=>{state.composing=false;toast('🚀 LIVE! Link in Blog tab');render()}).catch(er=>toast('⚠️ '+er.message));return}
+ publishToBlog(t,bo,so||'D-Ray Show',{imgB64:state.pendingImg,edit:state.editing}).then(()=>{state.composing=false;state.editing=null;state.pendingImg=null;toast('🚀 LIVE! Link in Blog tab');render()}).catch(er=>toast('⚠️ '+er.message));return}
 if(d.act==='blogrefresh'){loadBlog();return}
 if(d.act==='blogcopy'){navigator.clipboard.writeText(state.blog[d.i].url).then(()=>toast('🔗 Link copied!'));return}
 if(d.act==='blogshare'){const p=state.blog[d.i];if(navigator.share)navigator.share({title:p.title,url:p.url}).catch(()=>{});else navigator.clipboard.writeText(p.url).then(()=>toast('🔗 Link copied!'));return}
 if(d.act==='blogopen'){window.open(state.blog[d.i].url,'_blank');return}
-if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
+if(d.act==='blogedit'){state.editing=state.blog[d.i];state.composing=true;state.pendingImg=null;render();window.scrollTo(0,0);return}if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
 if(d.act==='savegh'){state.ghToken=$('#ghToken').value.trim();state.ghRepo=$('#ghRepo').value.trim();localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);toast('✅ GitHub saved for Blog publishing');return}
 if(d.act==='testkey'){testKey();return}
 if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
 if(d.act==='sample'){loadSamples();return}
 });
-document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.set==='sound')state.sound=e.target.checked});
+document.addEventListener('change',e=>{
+if(e.target.dataset&&e.target.dataset.set==='sound')state.sound=e.target.checked;
+if(e.target.id==='cImg'&&e.target.files&&e.target.files[0]){toast('🖼 Preparing image…');fileToB64(e.target.files[0]).then(b=>{state.pendingImg=b;toast('🖼 Image attached');render()}).catch(()=>toast('⚠️ Image failed — try another'))}
+});
 $('#region').addEventListener('change',e=>{state.region=e.target.value;render()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 let started=false;
 function start(){if(started)return;started=true;render();checkFeeds();loadBlog();setInterval(checkFeeds,180000)}
 if(state.user){$('#login').style.display='none';start()}
-</script></body>
+</script>
+</body>
 </html>
