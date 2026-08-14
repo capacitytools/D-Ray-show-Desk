@@ -20,6 +20,7 @@ header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:8px;p
 .brand span{display:block;font:600 8.5px Inter;color:var(--mut);letter-spacing:1.6px}
 select,.hbtn{background:#122442;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:600 13px Inter}
 main{max-width:640px;margin:0 auto;padding:14px 12px}
+.scanline{color:var(--mut);font:600 11px Inter;margin:0 2px 12px}
 .card{background:linear-gradient(180deg,#132544,#0E1C36);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px;animation:in .4s}
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
 .ready{display:inline-flex;align-items:center;gap:7px;font:800 11px Inter;letter-spacing:1.2px;color:var(--green);border:1.5px solid var(--green);border-radius:20px;padding:4px 11px;margin-bottom:9px}
@@ -31,6 +32,7 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .card h3{font:800 17px/1.3 Montserrat,Inter;margin-bottom:6px}
 .meta{color:var(--mut);font:600 12px Inter;margin-bottom:11px}
+.chipS{color:#F5B841;border:1px solid #F5B841;border-radius:8px;padding:1px 6px;font-size:10px}
 .btns{display:flex;gap:9px;flex-wrap:wrap}
 .gen{background:linear-gradient(180deg,var(--red2),var(--red));color:#fff;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter;box-shadow:0 4px 14px #d32f2f55}
 .re{background:#E8EDF4;color:#122442;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
@@ -45,9 +47,9 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 10.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
 nav button i{font-style:normal;font-size:17px}
-nav button.on{color:var(--blue2)}
-.grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
-.src{display:flex;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font:600 13px Inter}.src em{color:var(--mut);font-style:normal;font-size:11px;white-space:nowrap}
+nav button.on{color:var(--blue2)}.grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
+.src{display:flex;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font:600 13px Inter}
+.src em{color:var(--mut);font-style:normal;font-size:11px;white-space:nowrap}
 .set{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font:600 13px Inter;display:flex;justify-content:space-between;align-items:center}
 #toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#0F2C1B;border:1px solid var(--green);color:#C9F5D8;border-radius:12px;padding:9px 16px;font:700 12.5px Inter;z-index:120;display:none;max-width:92vw}
 .empty{color:var(--mut);text-align:center;padding:40px 10px;font:600 13px Inter}
@@ -88,15 +90,15 @@ nav button.on{color:var(--blue2)}
 <script>
 const $=s=>document.querySelector(s);
 const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
-const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',sound:true};
+const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',sound:true,lastScan:null,sampled:false};
 const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<');
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
-const now=()=>new Date().toUTCString().slice(17,22);
+const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
+const ago=ts=>{const m=Math.max(0,Math.round((Date.now()-ts)/60000));if(m<1)return'just now';if(m<60)return m+'m ago';return Math.floor(m/60)+'h '+(m%60)+'m ago'};
 function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3800)}
 function beep(){if(!state.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.18)}catch(e){}}
-
-/* ============ D-RAY MASTER EDITORIAL BRAIN (condensed) + OUTPUT ENGINE v1 ============ */
-const MASTER=`You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update"), a media house covering sports, politics and current happenings worldwide.CORE RULES:
+const MASTER=`You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update"), a media house covering sports, politics and current happenings worldwide.
+CORE RULES:
 - Treat the source text ONLY as facts. Rebuild the story from scratch (WHO/WHAT/WHERE/WHEN/WHY/HOW). Never copy sentences, phrases, headline structure or paragraph order from the source.
 - Never invent facts, quotes, statistics or statements. If unverified, label it ("according to...", "the claim has not been independently verified").
 - Lead with the most important confirmed development. Short punchy sentences for impact, longer for context. Professional human newsroom tone.
@@ -114,38 +116,57 @@ RETURN ONLY A VALID JSON OBJECT with exactly these 5 keys:
 "ip": AI image generation prompt, 4:5 vertical: scene built ONLY from confirmed facts; photorealistic editorial style graded in royal blue #1E5AA8 and signal red #D32F2F; top-left D-Ray shield logo watermark; top-right red BREAKING chip; bottom-third royal-blue banner with thin red stripe, bold white headline max 6 words + tagline "YOUR DAILY GLOBAL UPDATE"; no third-party logos, no identifiable faces; end with --ar 4:5.
 REGENERATE rule: take a clearly different angle (human angle vs institutional angle), never a synonym swap.`;
 
-/* ============ LIVE FEEDS (World / Africa / Nigeria) ============ */
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
 {region:'nigeria',flag:'🇳🇬',name:'Nigeria',url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
 
+/* ---- RELIABLE FEED PULLER: 3 fallback routes ---- */
+function parseXML(t){const xml=new DOMParser().parseFromString(t,'text/xml');return[...xml.querySelectorAll('item')].map(n=>({title:(n.querySelector('title')||{}).textContent||'',link:(n.querySelector('link')||{}).textContent||'',pub:(n.querySelector('pubDate')||{}).textContent||''}))}
+async function pull(f){
+const tries=[
+ async()=>{const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url));if(!r.ok)throw 0;return parseXML(await r.text())},
+ async()=>{const r=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url));const d=await r.json();if(!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))},
+ async()=>{const r=await fetch('https://corsproxy.io/?url='+encodeURIComponent(f.url));if(!r.ok)throw 0;return parseXML(await r.text())}
+];
+for(const t of tries){try{const it=await t();if(it&&it.length)return it}catch(e){}}
+return[]}
+
+/* ---- SCAN: only last 60 minutes, time shown on every card ---- */
 async function checkFeeds(){
+let found=0;
 for(const f of FEEDS){
- try{
-  const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(f.url));
-  const d=await r.json();
-  const xml=new DOMParser().parseFromString(d.contents,'text/xml');
-  const items=[...xml.querySelectorAll('item')].slice(0,2);
-  for(const n of items){
-   let title=n.querySelector('title').textContent;
-   const link=n.querySelector('link').textContent;
-   const pub=n.querySelector('pubDate')?n.querySelector('pubDate').textContent:'';
-   let src=f.name;const parts=title.split(' - ');
-   if(parts.length>1){src=parts.pop().trim();title=parts.join(' - ')}
-   const id=hash(link);
-   if(state.seen.includes(id))continue;
-   state.seen.push(id);localStorage.setItem('drs_seen',JSON.stringify(state.seen));
-   state.arrived.unshift({id,title,link,source:src,flag:f.flag,country:f.name,region:f.region,time:pub?new Date(pub).toUTCString().slice(17,22):now()});
-   toast('🟢 BREAKING — '+src+' • '+f.flag+' '+f.name);beep();
-  }
- }catch(e){}
+ const items=(await pull(f)).slice(0,8);
+ let fresh=items.filter(i=>!i.pub||(Date.now()-new Date(i.pub).getTime())<=3600000);
+ if(!fresh.length)fresh=items.slice(0,3);
+ for(const n of fresh){
+  let title=n.title;const link=n.link;if(!link)continue;
+  let src=f.name;const parts=title.split(' - ');
+  if(parts.length>1){src=parts.pop().trim();title=parts.join(' - ')}
+  const id=hash(link);
+  if(state.seen.includes(id))continue;  state.seen.push(id);localStorage.setItem('drs_seen',JSON.stringify(state.seen));
+  const ts=n.pub?new Date(n.pub).getTime():Date.now();
+  state.arrived.unshift({id,title,link,source:src,flag:f.flag,country:f.name,region:f.region,ts});
+  found++;
+ }
 }
-state.arrived=state.arrived.slice(0,30);
-if(state.view==='dash'||state.view==='alerts')render();
-}
-/* ============ GROK (xAI) GENERATION ============ */
+state.seen=state.seen.slice(-300);localStorage.setItem('drs_seen',JSON.stringify(state.seen));
+state.arrived=state.arrived.slice(0,40);
+state.lastScan=Date.now();
+if(found>0){toast('🟢 '+found+' new break'+(found>1?'s':'')+' in the last 60 min');beep()}
+if(!state.arrived.length){loadSamples();toast('⚠️ Feeds quiet/unreachable — samples loaded so you can test')}
+if(state.view==='dash'||state.view==='alerts')render()}
+
+function loadSamples(){
+if(state.sampled)return;state.sampled=true;
+[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
+{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳🇬',c:'Nigeria',r:'nigeria'},
+{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
+.forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
+render()}
+
+/* ---- GROK (xAI) GENERATION ---- */
 async function gen(id,angle){
 if(!state.apiKey)return toast('⚠️ Add your Grok API key in Settings first');
 const it=state.arrived.find(x=>x.id===id);if(!it||it.busy)return;
@@ -161,10 +182,9 @@ try{
 }catch(e){
  it.busy=false;it.error=true;
  state.out[id]={fb:'⚠️ Generation failed: '+e.message+' — check your Grok key in Settings, then tap REGENERATE.',tw:'',vo:'',cm:'',ip:''};render();
-}
-}
+}}
 
-/* ============ UI ============ */
+/* ---- UI ---- */
 const TABS=[['fb','FB/IG Post'],['tw','X Tweet'],['vo','Voice-Over'],['cm','Commentary'],['ip','Image Prompt']];
 function panelHTML(it){const t=state.tab[it.id]||'fb';
 return `<div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${t===k?'on':''}" data-act="tab" data-id="${it.id}" data-t="${k}">${l}</button>`).join('')}</div>
@@ -172,16 +192,16 @@ return `<div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${t===k?'on':'
 <div class="out">${esc(state.out[it.id][t])}</div><div class="credit">Credit: ${esc(it.source)}</div>`}
 function cardHTML(it){
 const badge=it.busy?'<div class="ready busyb"><span class="spinner"></span>AI WRITING…</div>':(it.error?'<div class="ready errb">⚠ RETRY BELOW</div>':'<div class="ready"><span class="dot"></span>READY</div>');
-return `<div class="card">${badge}<h3>${esc(it.title)}</h3><div class="meta">🕒 ${it.time} GMT • ${it.flag} ${it.country} • Source: ${esc(it.source)}</div>
-<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>
-${state.out[it.id]?panelHTML(it):''}</div>`}
+return `<div class="card">${badge}<h3>${esc(it.title)}</h3>
+<div class="meta">🕒 ${fmt(it.ts)} GMT • ${ago(it.ts)} • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}</div>
+<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=l.length?l.map(cardHTML).join(''):`<div class="empty">Monitoring World • Africa • Nigeria feeds…<br>Breaks appear here the moment they drop 🟢<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button>${state.apiKey?'':'<br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button>'}</div>`;return}
-if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 LIVE BREAKS — TODAY</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${i.time} • ${i.flag}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+$('#view').innerHTML=`<div class="scanline">🛰 Window: last 60 min • auto-scan 90s • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning World • Africa • Nigeria…<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 LIVE BREAKS — LAST 60 MIN</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${ago(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card"><h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
 if(v==='set'){$('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
 <div class="set"><span>🔑 Grok API Key (stored only on this phone)</span></div>
@@ -190,13 +210,13 @@ if(v==='set'){$('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</d
 <div class="set" style="margin-top:10px"><span>🔔 Sound on new break</span><input type="checkbox" data-set="sound" ${state.sound?'checked':''} style="width:auto;margin:0"></div>
 <div class="set"><span>👤 Logged in</span><em>${esc(state.user)} (${esc(state.role)})</em></div>
 <button class="re" style="width:100%" data-act="logout">🚪 LOG OUT</button>
-<div class="empty">Staff: 3 Admins • 2 Editors<br>AI: xAI Grok • Host: Vercel</div>`}
-}
+<div class="empty">Staff: 3 Admins • 2 Editors<br>AI: xAI Grok • Host: Vercel</div>`}}
 
-/* ============ EVENTS ============ */
-document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
+/* ---- EVENTS ---- */
+document.addEventListener('click',e=>{
+const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
- if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';render();checkFeeds();setInterval(checkFeeds,120000)}
+ if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
  else toast('❌ Invalid username or PIN');return}
 if(d.act==='nav'){state.view=d.v;render();return}
 if(d.act==='refresh'){toast('🔄 Scanning live feeds…');checkFeeds();return}
@@ -205,15 +225,17 @@ if(d.act==='regen'){gen(d.id,true);return}
 if(d.act==='tab'){state.tab[d.id]=d.t;render();return}
 if(d.act==='copy'){navigator.clipboard.writeText(state.out[d.id][state.tab[d.id]||'fb']).then(()=>toast('✅ Copied!'));return}
 if(d.act==='copyraw'){navigator.clipboard.writeText(state.drafts[d.i].out[d.t]).then(()=>toast('✅ Copied!'));return}
-if(d.act==='save'){const it=state.arrived.find(x=>x.id===d.id);state.drafts.unshift({title:it.title,source:it.source,ts:it.time,out:state.out[it.id]});localStorage.setItem('drs_drafts',JSON.stringify(state.drafts));toast('💾 Saved to Drafts');render();return}
+if(d.act==='save'){const it=state.arrived.find(x=>x.id===d.id);state.drafts.unshift({title:it.title,source:it.source,ts:fmt(it.ts),out:state.out[it.id]});localStorage.setItem('drs_drafts',JSON.stringify(state.drafts));toast('💾 Saved to Drafts');render();return}
 if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Grok key saved on this phone');return}
 if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
-if(d.act==='sample'){state.arrived.unshift({id:'s'+Date.now(),title:'Major earthquake strikes eastern Turkey',link:'https://example.com',source:'Reuters',flag:'🇹🇷',country:'Turkey',region:'world',time:now()});render();return}
+if(d.act==='sample'){loadSamples();return}
 });
-document.addEventListener('change',e=>{if(e.target.dataset.set==='sound'){state.sound=e.target.checked}});
+document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.set==='sound')state.sound=e.target.checked});
 $('#region').addEventListener('change',e=>{state.region=e.target.value;render()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-if(state.user){$('#login').style.display='none';render();checkFeeds();setInterval(checkFeeds,120000)}
+let started=false;
+function start(){if(started)return;started=true;render();checkFeeds();setInterval(checkFeeds,90000)}
+if(state.user){$('#login').style.display='none';start()}
 </script>
 </body>
 </html>
