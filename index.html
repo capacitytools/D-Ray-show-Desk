@@ -33,6 +33,7 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 .card h3{font:800 17px/1.3 Montserrat,Inter;margin-bottom:6px}
 .meta{color:var(--mut);font:600 12px Inter;margin-bottom:11px}
 .chipS{color:#F5B841;border:1px solid #F5B841;border-radius:8px;padding:1px 6px;font-size:10px}
+.chipO{color:var(--mut);border:1px solid var(--mut);border-radius:8px;padding:1px 6px;font-size:10px}
 .btns{display:flex;gap:9px;flex-wrap:wrap}
 .gen{background:linear-gradient(180deg,var(--red2),var(--red));color:#fff;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter;box-shadow:0 4px 14px #d32f2f55}
 .re{background:#E8EDF4;color:#122442;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
@@ -46,8 +47,8 @@ main{max-width:640px;margin:0 auto;padding:14px 12px}
 .credit{text-align:right;color:var(--mut);font:600 11.5px Inter;margin-top:7px}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 10.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
-nav button i{font-style:normal;font-size:17px}
-nav button.on{color:var(--blue2)}.grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
+nav button i{font-style:normal;font-size:17px}nav button.on{color:var(--blue2)}
+.grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
 .src{display:flex;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font:600 13px Inter}
 .src em{color:var(--mut);font-style:normal;font-size:11px;white-space:nowrap}
 .set{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font:600 13px Inter;display:flex;justify-content:space-between;align-items:center}
@@ -90,13 +91,13 @@ nav button.on{color:var(--blue2)}.grp{font:800 12px Inter;letter-spacing:1.4px;c
 <script>
 const $=s=>document.querySelector(s);
 const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
-const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',sound:true,lastScan:null,sampled:false};
+const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:[],seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',sound:true,lastScan:null,sampled:false,lastModel:''};
 const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<');
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
 const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
 const ago=ts=>{const m=Math.max(0,Math.round((Date.now()-ts)/60000));if(m<1)return'just now';if(m<60)return m+'m ago';return Math.floor(m/60)+'h '+(m%60)+'m ago'};
-function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3800)}
-function beep(){if(!state.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.18)}catch(e){}}
+function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3800)}function beep(){if(!state.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.18)}catch(e){}}
+
 const MASTER=`You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update"), a media house covering sports, politics and current happenings worldwide.
 CORE RULES:
 - Treat the source text ONLY as facts. Rebuild the story from scratch (WHO/WHAT/WHERE/WHEN/WHY/HOW). Never copy sentences, phrases, headline structure or paragraph order from the source.
@@ -108,7 +109,7 @@ CORE RULES:
 CREDIT RULE (never skip): "📰 Credit: {Source Name}".
 BRAND SIGN-OFF: "📺 D-Ray Show — Your Daily Global Update."
 SOCIAL HANDLES to append at the end of social formats: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport
-RETURN ONLY A VALID JSON OBJECT with exactly these 5 keys:
+RETURN ONLY A VALID JSON OBJECT with exactly these 5 keys (no markdown, no code fences):
 "fb": Facebook & Instagram post (Meta-policy safe): 🚨 hook line; 1-sentence lead; "What we know so far:" bullets (confirmed facts only); "What happens next:" line; credit line; brand sign-off; "Follow for updates as this story develops."; 3-5 relevant hashtags + #DRayShow. No engagement-bait, no hashtag spam.
 "tw": X tweet, MAX 280 characters: one fact + one status line + "📰 via {Source}" + max 2 hashtags.
 "vo": 30-second TikTok/YouTube voice-over script: spoken rhythm, short sentences, timecodes (0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro), [ON SCREEN] cues with red BREAKING strap + country + logo bug, fixed outro "Follow D-Ray Show — your daily global update.", [END CARD: royal-blue frame, red stripe, tagline].
@@ -119,10 +120,9 @@ REGENERATE rule: take a clearly different angle (human angle vs institutional an
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
-{region:'nigeria',flag:'🇳🇬',name:'Nigeria',url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'}];
+{region:'nigeria',flag:'🇳',name:'Nigeria',url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
 
-/* ---- RELIABLE FEED PULLER: 3 fallback routes ---- */
 function parseXML(t){const xml=new DOMParser().parseFromString(t,'text/xml');return[...xml.querySelectorAll('item')].map(n=>({title:(n.querySelector('title')||{}).textContent||'',link:(n.querySelector('link')||{}).textContent||'',pub:(n.querySelector('pubDate')||{}).textContent||''}))}
 async function pull(f){
 const tries=[
@@ -133,7 +133,6 @@ const tries=[
 for(const t of tries){try{const it=await t();if(it&&it.length)return it}catch(e){}}
 return[]}
 
-/* ---- SCAN: only last 60 minutes, time shown on every card ---- */
 async function checkFeeds(){
 let found=0;
 for(const f of FEEDS){
@@ -145,8 +144,8 @@ for(const f of FEEDS){
   let src=f.name;const parts=title.split(' - ');
   if(parts.length>1){src=parts.pop().trim();title=parts.join(' - ')}
   const id=hash(link);
-  if(state.seen.includes(id))continue;  state.seen.push(id);localStorage.setItem('drs_seen',JSON.stringify(state.seen));
-  const ts=n.pub?new Date(n.pub).getTime():Date.now();
+  if(state.seen.includes(id))continue;
+  state.seen.push(id);localStorage.setItem('drs_seen',JSON.stringify(state.seen));  const ts=n.pub?new Date(n.pub).getTime():Date.now();
   state.arrived.unshift({id,title,link,source:src,flag:f.flag,country:f.name,region:f.region,ts});
   found++;
  }
@@ -162,29 +161,52 @@ function loadSamples(){
 if(state.sampled)return;state.sampled=true;
 [{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
 {t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳🇬',c:'Nigeria',r:'nigeria'},
-{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
+{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰',c:'Kenya',r:'africa'}]
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
 
-/* ---- GROK (xAI) GENERATION ---- */
+/* ---- AI CALL: auto-detects xAI Grok (xai-...) vs Groq (gsk-...), auto-fallback models ---- */
+async function aiCall(userMsg){
+const p=state.apiKey.trim().startsWith('gsk_')
+ ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant'],name:'Groq'}
+ :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'};
+let lastErr='';
+for(const m of p.models){
+ try{
+  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,temperature:0.5,messages:[{role:'system',content:MASTER},{role:'user',content:userMsg}]})});
+  if(res.ok){const d=await res.json();return{text:d.choices[0].message.content,model:m,prov:p.name}}
+  const body=await res.text();
+  lastErr=p.name+' '+m+' → HTTP '+res.status+': '+body.slice(0,140);
+  if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.');
+ }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
+}
+throw new Error(lastErr||'All AI models failed');
+}
+function extractJSON(txt){
+let t=txt.trim();
+if(t.startsWith('```')){t=t.replace(/^```[a-z]*\n?/,'').replace(/```$/,'')}
+const s=t.indexOf('{'),e=t.lastIndexOf('}');
+if(s>-1&&e>s)t=t.slice(s,e+1);
+return JSON.parse(t);
+}
+
 async function gen(id,angle){
-if(!state.apiKey)return toast('⚠️ Add your Grok API key in Settings first');
+if(!state.apiKey)return toast('⚠️ Add your Grok/Groq API key in Settings first');
 const it=state.arrived.find(x=>x.id===id);if(!it||it.busy)return;
 it.busy=true;it.error=false;render();
-try{
- if(!it.raw){try{const j=await fetch('https://r.jina.ai/'+it.link);it.raw=(await j.text()).slice(0,9000)}catch(e){}}
+try{ if(!it.raw){try{const j=await fetch('https://r.jina.ai/'+it.link);it.raw=(await j.text()).slice(0,9000)}catch(e){}}
  const userMsg=(angle?'REGENERATE with a clearly different angle (human vs institutional). Previous FB version to differ from:\n'+((state.out[id]&&state.out[id].fb)||'')+'\n\n':'')+'SOURCE: '+it.source+'\nHEADLINE: '+it.title+'\nFULL TEXT:\n'+(it.raw||it.title);
- const res=await fetch('https://api.x.ai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey,'Content-Type':'application/json'},body:JSON.stringify({model:'grok-2-latest',temperature:0.5,response_format:{type:'json_object'},messages:[{role:'system',content:MASTER},{role:'user',content:userMsg}]})});
- if(!res.ok)throw new Error('API error '+res.status+' (check key/credits)');
- const data=await res.json();
- state.out[id]=JSON.parse(data.choices[0].message.content);
- it.busy=false;toast(angle?'⟳ Fresh angle ready':'⚡ Generated in D-Ray style');render();
+ const r=await aiCall(userMsg);
+ state.lastModel=r.prov+' / '+r.model;
+ let out;
+ try{out=extractJSON(r.text)}catch(e){out={fb:r.text,tw:r.text.slice(0,280),vo:'(see FB/IG tab)',cm:'(see FB/IG tab)',ip:'(see FB/IG tab)'}}
+ state.out[id]=out;
+ it.busy=false;toast(angle?'⟳ Fresh angle ready ('+r.model+')':'⚡ Generated via '+r.model);render();
 }catch(e){
  it.busy=false;it.error=true;
- state.out[id]={fb:'⚠️ Generation failed: '+e.message+' — check your Grok key in Settings, then tap REGENERATE.',tw:'',vo:'',cm:'',ip:''};render();
+ state.out[id]={fb:'⚠️ Generation failed: '+e.message+' — open Settings, re-paste your key, then tap REGENERATE.',tw:'',vo:'',cm:'',ip:''};render();
 }}
 
-/* ---- UI ---- */
 const TABS=[['fb','FB/IG Post'],['tw','X Tweet'],['vo','Voice-Over'],['cm','Commentary'],['ip','Image Prompt']];
 function panelHTML(it){const t=state.tab[it.id]||'fb';
 return `<div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${t===k?'on':''}" data-act="tab" data-id="${it.id}" data-t="${k}">${l}</button>`).join('')}</div>
@@ -193,26 +215,27 @@ return `<div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${t===k?'on':'
 function cardHTML(it){
 const badge=it.busy?'<div class="ready busyb"><span class="spinner"></span>AI WRITING…</div>':(it.error?'<div class="ready errb">⚠ RETRY BELOW</div>':'<div class="ready"><span class="dot"></span>READY</div>');
 return `<div class="card">${badge}<h3>${esc(it.title)}</h3>
-<div class="meta">🕒 ${fmt(it.ts)} GMT • ${ago(it.ts)} • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}</div>
-<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>${state.out[it.id]?panelHTML(it):''}</div>`}
+<div class="meta">🕒 ${fmt(it.ts)} GMT • ${ago(it.ts)} • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}${(!it.sample&&(Date.now()-it.ts)>3600000)?' <span class="chipO">🕰 EARLIER</span>':''}</div>
+<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>
+${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
 $('#view').innerHTML=`<div class="scanline">🛰 Window: last 60 min • auto-scan 90s • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning World • Africa • Nigeria…<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 LIVE BREAKS — LAST 60 MIN</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${ago(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card"><h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
 if(v==='set'){$('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🔑 Grok API Key (stored only on this phone)</span></div>
-<input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-..." style="max-width:none">
+<div class="set"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected • stored only on this phone</span></div>
+<input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-... or gsk-..." style="max-width:none">
 <button class="gen" style="width:100%" data-act="savekey">💾 SAVE KEY</button>
 <div class="set" style="margin-top:10px"><span>🔔 Sound on new break</span><input type="checkbox" data-set="sound" ${state.sound?'checked':''} style="width:auto;margin:0"></div>
 <div class="set"><span>👤 Logged in</span><em>${esc(state.user)} (${esc(state.role)})</em></div>
+<div class="set"><span>🤖 Last AI model used</span><em>${esc(state.lastModel||'—')}</em></div>
 <button class="re" style="width:100%" data-act="logout">🚪 LOG OUT</button>
-<div class="empty">Staff: 3 Admins • 2 Editors<br>AI: xAI Grok • Host: Vercel</div>`}}
+<div class="empty">Staff: 3 Admins • 2 Editors • Host: Vercel</div>`}}
 
-/* ---- EVENTS ---- */
 document.addEventListener('click',e=>{
 const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
@@ -220,13 +243,12 @@ if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').va
  else toast('❌ Invalid username or PIN');return}
 if(d.act==='nav'){state.view=d.v;render();return}
 if(d.act==='refresh'){toast('🔄 Scanning live feeds…');checkFeeds();return}
-if(d.act==='gen'){gen(d.id,false);return}
-if(d.act==='regen'){gen(d.id,true);return}
+if(d.act==='gen'){gen(d.id,false);return}if(d.act==='regen'){gen(d.id,true);return}
 if(d.act==='tab'){state.tab[d.id]=d.t;render();return}
 if(d.act==='copy'){navigator.clipboard.writeText(state.out[d.id][state.tab[d.id]||'fb']).then(()=>toast('✅ Copied!'));return}
 if(d.act==='copyraw'){navigator.clipboard.writeText(state.drafts[d.i].out[d.t]).then(()=>toast('✅ Copied!'));return}
 if(d.act==='save'){const it=state.arrived.find(x=>x.id===d.id);state.drafts.unshift({title:it.title,source:it.source,ts:fmt(it.ts),out:state.out[it.id]});localStorage.setItem('drs_drafts',JSON.stringify(state.drafts));toast('💾 Saved to Drafts');render();return}
-if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Grok key saved on this phone');return}
+if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — auto-detect: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
 if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
 if(d.act==='sample'){loadSamples();return}
 });
