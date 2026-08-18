@@ -96,7 +96,8 @@ const $=s=>document.querySelector(s);
 const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
 const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:JSON.parse(localStorage.getItem('drs_cache')||'[]'),seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',feedLog:'',scanning:false,blog:null,blogLoading:false,composing:false,editing:null,pendingImg:null,relay:false,relayCode:0,healed:false,synced:false};
 const isBoss=()=>state.user==='admin1';
-const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
+const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');const safeJson=r=>r.text().then(t=>{try{return JSON.parse(t)}catch(e){return null}});
+const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
 const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
 const b64t=s=>btoa(unescape(encodeURIComponent(s)));
 function agoLabel(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));
@@ -109,7 +110,6 @@ return Math.floor(h/24)+'d ago'}
 function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',4200)}
 function beep(){if(!state.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.18)}catch(e){}}
 
-/* ---- server files the app can install ---- */
 const AI_JS=`let K={};try{K=require('./keys.js')}catch(e){}
 const KEY=process.env.AI_KEY||K.AI_KEY||'';
 async function models(p){try{const r=await fetch(p.url.replace('/chat/completions','/models'),{headers:{Authorization:'Bearer '+KEY}});if(!r.ok)return[];const d=await r.json();return (d.data||[]).map(function(x){return x.id})}catch(e){return[]}}
@@ -157,13 +157,13 @@ const RELAY_CODE=`// D-Ray Show — server-side news relay (Vercel serverless fu
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
-{region:'nigeria',flag:'🇳',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
-{region:'world',flag:'🇬',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
-{region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
-{region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
+{region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
+{region:'world',flag:'🇶',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
+{region:'nigeria',flag:'🇳',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
-{region:'africa',flag:'🇿',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
+{region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const dec=function(s){return String(s).replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g,'$1').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/'/g,"'").replace(/"/g,'"').trim()};
 function grab(b,t){var r=new RegExp('<'+t+'[^>]*>([\\\\s\\\\S]*?)</'+t+'>').exec(b);return r?dec(r[1]):''}
@@ -220,7 +220,7 @@ const FEEDS=[
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
 {region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
-{region:'africa',flag:'🇿',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
+{region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
 
@@ -229,8 +229,8 @@ function fetchT(url,ms){const c=new AbortController();const t=setTimeout(()=>c.a
 async function pull(f){
 const attempts=[
  (async()=>{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(),
- (async()=>{const r=await fetchT('https://api.allorigins.win/get?url='+encodeURIComponent(f.url),9000);const d=await r.json();if(!d.contents)throw 0;return parseXML(d.contents)})(),
- (async()=>{const r=await fetchT('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url),9000);const d=await r.json();if(!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))})(),
+ (async()=>{const r=await fetchT('https://api.allorigins.win/get?url='+encodeURIComponent(f.url),9000);const d=await safeJson(r);if(!d||!d.contents)throw 0;return parseXML(d.contents)})(),
+ (async()=>{const r=await fetchT('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.url),9000);const d=await safeJson(r);if(!d||!d.items)throw 0;return d.items.map(x=>({title:x.title,link:x.link,pub:x.pubDate}))})(),
  (async()=>{const r=await fetchT('https://corsproxy.io/?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(),
  (async()=>{const r=await fetchT('https://r.jina.ai/'+f.url,9000);const x=parseXML(await r.text());if(x.length)return x;throw 0})()
 ];
@@ -241,14 +241,14 @@ async function guardian(){
 try{
  const r=await fetchT('https://content.guardianapis.com/search?order-by=newest&page-size=10&api-key=test',9000);
  if(!r.ok)return[];
- const d=await r.json();
+ const d=await safeJson(r);
  return ((d.response&&d.response.results)||[]).map(x=>({title:x.webTitle,link:x.webUrl,pub:x.webPublicationDate,region:'world',flag:'🌍',country:'World',src:'The Guardian',goog:false}));
 }catch(e){return[]}}
 async function gather(){
 try{
  const r=await fetchT('/api/feeds',15000);
  state.relayCode=r.status;
- if(r.ok){const d=await r.json();
+ if(r.ok){const d=await safeJson(r);
   if(d&&d.items&&d.items.length){state.relay=true;return d.items}}
 }catch(e){state.relayCode='net'}
 state.relay=false;
@@ -300,7 +300,6 @@ if(state.sampled)return;state.sampled=true;
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
 
-/* ---- AI: server-first (keys live on Vercel), local fallback for admin1 ---- */
 function prov(){return state.apiKey.trim().startsWith('gsk_')
  ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instruct','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'}
  :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
@@ -308,8 +307,8 @@ async function discoverModels(p){
 try{
  const r=await fetchT(p.url.replace('/chat/completions','/models'),9000);
  if(!r.ok)return[];
- const d=await r.json();
- return (d.data||[]).map(x=>x.id);
+ const d=await safeJson(r);
+ return (d&&d.data||[]).map(x=>x.id);
 }catch(e){return[]}}
 async function modelList(p){
 const avail=await discoverModels(p);
@@ -324,7 +323,7 @@ return list}
 async function aiCall(userMsg){
 try{
  const r=await fetchT('/api/ai',60000);
- if(r.ok){const d=await r.json();if(d&&d.text){state.lastModel='Server / '+d.model;return{text:d.text,model:d.model,prov:'Server'}}}
+ if(r.ok){const d=await safeJson(r);if(d&&d.text){state.lastModel='Server / '+d.model;return{text:d.text,model:d.model,prov:'Server'}}}
  if(r.status===404&&isBoss()&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.synced){
   state.synced=true;toast('☁️ Server AI missing — installing…');
   try{
@@ -333,7 +332,7 @@ try{
    if(state.apiKey.trim())await ghUpsertLocal(state.ghRepo.trim(),'api/keys.js',b64t(keysCode()),'Sync newsroom keys');
   }catch(e){}
  }
- if(r.status===500){const d=await r.json().catch(()=>null);
+ if(r.status===500){const d=await safeJson(r);
   if(d&&d.error==='no_keys'&&!state.apiKey.trim())throw new Error('Keys not on the server yet — ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');}
 }catch(e){ if(String(e.message).includes('Admin1'))throw e; }
 if(!state.apiKey.trim())throw new Error('Ask Admin1 to tap ☁️ SYNC KEYS TO SERVER in Settings');
@@ -341,9 +340,10 @@ const p=prov();
 const list=await modelList(p);
 let lastErr='';
 for(const m of list){
- try{  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,temperature:0.5,messages:[{role:'system',content:MASTER},{role:'user',content:userMsg}]})});
-  if(res.ok){const d=await res.json();state.lastModel=p.name+' / '+m;return{text:d.choices[0].message.content,model:m,prov:p.name}}
-  const body=await res.text();
+ try{
+  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,temperature:0.5,messages:[{role:'system',content:MASTER},{role:'user',content:userMsg}]})});  const body=await res.text();
+  if(res.ok){let d=null;try{d=JSON.parse(body)}catch(e){}
+   if(d&&d.choices){state.lastModel=p.name+' / '+m;return{text:d.choices[0].message.content,model:m,prov:p.name}}}
   lastErr=p.name+' '+m+' → HTTP '+res.status+': '+body.slice(0,140);
   if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.');
  }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
@@ -372,7 +372,7 @@ toast('🛰 Testing feed routes…');
 const log=[];
 try{
  const r=await fetchT('/api/feeds',12000);let n=0;
- try{const d=await r.json();n=(d.items||[]).length}catch(e){}
+ const d=await safeJson(r);n=d&&d.items?d.items.length:0;
  log.push('/api/feeds (your Vercel relay) → HTTP '+r.status+', '+n+' items'+(r.status===404?' — MISSING: admin1 tap 🛠 INSTALL NEWS RELAY':''));
 }catch(e){log.push('/api/feeds → network error')}
 try{const r=await fetchT('https://content.guardianapis.com/search?page-size=1&api-key=test',9000);log.push('Guardian API (CORS-native) → HTTP '+r.status)}catch(e){log.push('Guardian API → blocked')}
@@ -408,7 +408,6 @@ return obj;
 }
 
 async function gen(id,angle){
-if(!state.apiKey.trim()&&!isBoss()){/* editors rely on server; aiCall will guide if missing */}
 const it=state.arrived.find(x=>x.id===id);if(!it||it.busy)return;
 it.busy=true;it.error=false;render();
 try{
@@ -428,27 +427,27 @@ try{
  state.out[id]={fb:'⚠️ Generation failed: '+e.message,tw:'',vo:'',cm:'',full:'',ip:''};render();
 }}
 
-/* ---- GitHub: server-first, local fallback (admin1) ---- */
 function ghAuth(){return{'Authorization':'token '+state.ghToken.trim(),'Accept':'application/vnd.github+json'}}
 async function ghGetMeta(repo,path){
 try{
  const r=await fetch('/api/gh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({get:1,path})});
- if(r.ok){const d=await r.json();if(d.exists)return d.meta;return null}
+ if(r.ok){const d=await safeJson(r);if(d&&d.exists)return d.meta;return null}
 }catch(e){}
-if(!state.ghToken.trim())return null;
-try{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{headers:ghAuth()});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+if(!state.ghToken.trim()||!repo||!repo.includes('/'))return null;
+try{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{headers:ghAuth()});if(!r.ok)return null;return await safeJson(r)}catch(e){return null}}
 async function ghUpsertLocal(repo,path,b64,msg){
 if(!state.ghToken.trim()||!repo)throw new Error('Admin1: save GitHub token + repo in Settings first');
-const meta=await ghGetMeta(repo,path);const body={message:msg,content:b64};
-if(meta&&meta.sha)body.sha=meta.sha;
+if(!repo.includes('/'))throw new Error('Repo must be username/repo-name — re-save GitHub in Settings');
+const meta=await ghGetMeta(repo,path);
+const body={message:msg,content:b64};if(meta&&meta.sha)body.sha=meta.sha;
 const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{...ghAuth(),'Content-Type':'application/json'},body:JSON.stringify(body)});
 if(!r.ok){const t=await r.text();throw new Error('GitHub '+r.status+' '+t.slice(0,90))}
-return r.json()}
+return await safeJson(r)||{}}
 async function ghUpsert(repo,path,b64,msg){
 try{
  const r=await fetch('/api/gh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,message:msg,content:b64})});
- if(r.ok)return await r.json();
- const d=await r.json().catch(()=>null);
+ if(r.ok)return await safeJson(r)||{};
+ const d=await safeJson(r);
  if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
 }catch(e){ if(String(e.message).includes('Admin1'))throw e; }
 return ghUpsertLocal(repo,path,b64,msg)}
@@ -476,7 +475,7 @@ loadBlog();
 return url}
 async function loadBlog(){
 state.blogLoading=true;if(state.view==='blog')render();
-try{const r=await fetch('/blog/index.json');state.blog=r.ok?await r.json():[]}catch(e){state.blog=[]}
+try{const r=await fetch('/blog/index.json');state.blog=r.ok?(await safeJson(r))||[]:[]}catch(e){state.blog=[]}
 state.blogLoading=false;if(state.view==='blog')render()}
 
 const TABS=[['fb','Facebook'],['tw','Twitter / X'],['vo','Voice-Over'],['cm','Commentary'],['full','Full Article'],['ip','Image Prompt']];
@@ -488,13 +487,13 @@ return `${o.title?`<div class="hd">📰 ${esc(o.title)}</div>`:''}
 function cardHTML(it){
 const badge=it.busy?'<div class="ready busyb"><span class="spinner"></span>AI WRITING…</div>':(it.error?'<div class="ready errb">⚠ RETRY BELOW</div>':'<div class="ready"><span class="dot"></span>READY</div>');
 return `<div class="card">${badge}<h3>${esc(it.title)}</h3>
-<div class="meta">🕒 Posted ${fmt(it.ts)} GMT • <span class="${(Date.now()-it.ts)<600000?'fresh':''}">${agoLabel(it.ts)}</span> • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}</div><div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>
-${state.out[it.id]?panelHTML(it):''}</div>`}
+<div class="meta">🕒 Posted ${fmt(it.ts)} GMT • <span class="${(Date.now()-it.ts)<600000?'fresh':''}">${agoLabel(it.ts)}</span> • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}</div>
+<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v13 • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v14 • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
 if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
@@ -511,7 +510,7 @@ if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)
 if(v==='set'){
 const boss=isBoss();
 $('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v13</em></div>
+<div class="set"><span>🏗 Build</span><em>v14</em></div>
 <div class="set"><span>🛰 News route</span><em>${state.relay?'⚡ Vercel relay active':(state.relayCode===404?'🛠 relay auto-healing':'🌐 proxy+Guardian mode')}</em></div>
 ${boss?`
 <button class="pub" style="width:100%" data-act="synckeys">☁️ SYNC KEYS TO SERVER (one-time)</button>
@@ -521,9 +520,9 @@ ${boss?`
 <button class="gen" style="width:100%" data-act="savekey">💾 SAVE KEY</button>
 <button class="re" style="width:100%;margin-top:8px" data-act="testkey">🩺 TEST KEY</button>
 ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}</div>`:''}
-<div class="set" style="margin-top:10px"><span>🐙 GitHub Token (repo scope)</span></div>
+<div class="set" style="margin-top:10px"><span>🐙 GitHub Token (repo scope) — repo name alone is OK, we auto-add your username</span></div>
 <input id="ghToken" type="password" value="${esc(state.ghToken)}" placeholder="ghp_..." style="max-width:none">
-<input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="username/repo-name (this app's repo)" style="max-width:none">
+<input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="repo-name or username/repo-name" style="max-width:none">
 <button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
 <div class="empty" style="padding:8px 10px">⚠️ After syncing: make the repo PRIVATE (GitHub repo → Settings → Change visibility → Private) so keys stay hidden.</div>`
 :`<div class="set"><span>🔐 AI & publishing keys</span><em>✅ managed on server by Admin1</em></div>
@@ -536,9 +535,9 @@ ${state.feedLog?`<div class="out" style="margin-top:10px">${esc(state.feedLog)}<
 <button class="re" style="width:100%" data-act="logout">🚪 LOG OUT</button>
 <div class="empty">Staff: 3 Admins • 2 Editors • Host: Vercel</div>`}}
 
-document.addEventListener('click',e=>{
-const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
- if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
+document.addEventListener('click',async e=>{
+const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
+if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value; if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
  else toast('❌ Invalid username or PIN');return}
 if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
 if(d.act==='refresh'){toast('🔄 Scanning all channels…');checkFeeds();return}
@@ -562,15 +561,32 @@ if(d.act==='blogcopy'){navigator.clipboard.writeText(state.blog[d.i].url).then((
 if(d.act==='blogshare'){const p=state.blog[d.i];if(navigator.share)navigator.share({title:p.title,url:p.url}).catch(()=>{});else navigator.clipboard.writeText(p.url).then(()=>toast('🔗 Link copied!'));return}
 if(d.act==='blogopen'){window.open(state.blog[d.i].url,'_blank');return}
 if(d.act==='blogedit'){state.editing=state.blog[d.i];state.composing=true;state.pendingImg=null;render();window.scrollTo(0,0);return}
+if(d.act==='savekey'){if(!isBoss())return;state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
+if(d.act==='savegh'){
+ if(!isBoss())return;
+ state.ghToken=$('#ghToken').value.trim();
+ let repo=$('#ghRepo').value.trim();
+ if(!state.ghToken)return toast('⚠️ Paste your GitHub token first');
+ if(repo&&!repo.includes('/')){
+  try{
+   const r=await fetch('https://api.github.com/user',{headers:{Authorization:'token '+state.ghToken,Accept:'application/vnd.github+json'}});
+   const u=await safeJson(r);
+   if(u&&u.login)repo=u.login+'/'+repo;
+   else toast('⚠️ Could not verify token — check it has repo scope');
+  }catch(e){}
+ }
+ state.ghRepo=repo;
+ localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);
+ toast('✅ GitHub saved'+(repo.includes('/')?' as '+repo:''));return}
 if(d.act==='synckeys'){
  if(!isBoss())return toast('⚠️ Admin1 only');
  if(!state.apiKey.trim())return toast('⚠️ Save your AI key first');
  if(!state.ghToken.trim()||!state.ghRepo.trim())return toast('⚠️ Save GitHub token + repo first');
+ if(!state.ghRepo.includes('/'))return toast('⚠️ Repo must be username/repo — tap SAVE GITHUB again first');
  toast('☁️ Syncing keys + server functions…');
  (async()=>{try{
   await ghUpsertLocal(state.ghRepo.trim(),'api/keys.js',b64t(keysCode()),'Sync newsroom keys');
-  await ghUpsertLocal(state.ghRepo.trim(),'api/ai.js',b64t(AI_JS),'Install AI server function');
-  await ghUpsertLocal(state.ghRepo.trim(),'api/gh.js',b64t(GH_JS),'Install GitHub server function');
+  await ghUpsertLocal(state.ghRepo.trim(),'api/ai.js',b64t(AI_JS),'Install AI server function');  await ghUpsertLocal(state.ghRepo.trim(),'api/gh.js',b64t(GH_JS),'Install GitHub server function');
   toast('✅ Server ready — every staff phone now works with just login');
  }catch(e){toast('⚠️ '+e.message)}})();return}
 if(d.act==='installrelay'){
@@ -579,14 +595,13 @@ if(d.act==='installrelay'){
  toast('🛠 Installing relay…');
  ghUpsertLocal(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Install D-Ray news relay').then(()=>toast('✅ Relay installed — wait ~20s for Vercel, then 🔄')).catch(er=>toast('⚠️ '+er.message));return}
 if(d.act==='testfeeds'){testFeeds();return}
-if(d.act==='savekey'){if(!isBoss())return;state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
-if(d.act==='savegh'){if(!isBoss())return;state.ghToken=$('#ghToken').value.trim();state.ghRepo=$('#ghRepo').value.trim();localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);toast('✅ GitHub saved');return}
 if(d.act==='testkey'){if(!isBoss())return;testKey();return}
 if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
 if(d.act==='sample'){loadSamples();return}
 });
 document.addEventListener('change',e=>{
-if(e.target.dataset&&e.target.dataset.set==='sound')state.sound=e.target.checked;if(e.target.id==='cImg'&&e.target.files&&e.target.files[0]){toast('🖼 Preparing image…');fileToB64(e.target.files[0]).then(b=>{state.pendingImg=b;toast('🖼 Image attached');render()}).catch(()=>toast('⚠️ Image failed — try another'))}
+if(e.target.dataset&&e.target.dataset.set==='sound')state.sound=e.target.checked;
+if(e.target.id==='cImg'&&e.target.files&&e.target.files[0]){toast(' Preparing image…');fileToB64(e.target.files[0]).then(b=>{state.pendingImg=b;toast('🖼 Image attached');render()}).catch(()=>toast('⚠️ Image failed — try another'))}
 });
 $('#region').addEventListener('change',e=>{state.region=e.target.value;render()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
