@@ -112,12 +112,12 @@ const RELAY_CODE=`// D-Ray Show — server-side news relay (Vercel serverless fu
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
-{region:'nigeria',flag:'🇳',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
-{region:'world',flag:'🇬',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
+{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
+{region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
 {region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const dec=function(s){return String(s).replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g,'$1').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/'/g,"'").replace(/"/g,'"').trim()};
@@ -171,7 +171,7 @@ const FEEDS=[
 {region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
 {region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
 {region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
-{region:'nigeria',flag:'🇳',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
 {region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
@@ -191,11 +191,10 @@ const attempts=[
 const res=await Promise.allSettled(attempts);
 for(const r of res){if(r.status==='fulfilled'&&r.value&&r.value.length)return r.value}
 return[]}
-/* CORS-native world news — works from ANY browser, no proxy, no relay */
 async function guardian(){
 try{
- const r=await fetchT('https://content.guardianapis.com/search?order-by=newest&page-size=10&api-key=test',9000); if(!r.ok)return[];
- const d=await r.json();
+ const r=await fetchT('https://content.guardianapis.com/search?order-by=newest&page-size=10&api-key=test',9000);
+ if(!r.ok)return[]; const d=await r.json();
  return ((d.response&&d.response.results)||[]).map(x=>({title:x.webTitle,link:x.webUrl,pub:x.webPublicationDate,region:'world',flag:'🌍',country:'World',src:'The Guardian',goog:false}));
 }catch(e){return[]}}
 
@@ -219,7 +218,6 @@ return all}
 async function checkFeeds(){
 state.scanning=true;if(state.view==='dash')render();
 const items=await gather();
-/* AUTO-HEAL: relay missing/broken + GitHub saved → install it ourselves */
 if((state.relayCode===404||state.relayCode===500)&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.healed){
  state.healed=true;
  toast('🛠 Relay missing — auto-installing…');
@@ -243,10 +241,9 @@ for(const n of use){
 }
 state.seen=state.seen.slice(-500);localStorage.setItem('drs_seen',JSON.stringify(state.seen));
 state.arrived.sort((a,b)=>b.ts-a.ts).splice(60);
-/* PERMANENT MEMORY: never lose the Desk again */if(state.arrived.length)localStorage.setItem('drs_cache',JSON.stringify(state.arrived.slice(0,30)));
+if(state.arrived.length)localStorage.setItem('drs_cache',JSON.stringify(state.arrived.slice(0,30)));
 state.lastScan=Date.now();state.scanning=false;
-if(add>0){toast('🟢 '+add+' new stories added to the Desk');beep()}
-if(!state.arrived.length){loadSamples();toast('⚠️ Every route blocked on this network — samples loaded')}
+if(add>0){toast('🟢 '+add+' new stories added to the Desk');beep()}if(!state.arrived.length){loadSamples();toast('⚠️ Every route blocked on this network — samples loaded')}
 if(state.view==='dash'||state.view==='alerts')render()}
 
 function loadSamples(){
@@ -257,15 +254,35 @@ if(state.sampled)return;state.sampled=true;
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
 
+/* ---- v12: LIVE MODEL DISCOVERY — never stale again ---- */
 function prov(){return state.apiKey.trim().startsWith('gsk_')
- ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','llama-3.1-8b-instant'],name:'Groq'}
+ ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instruct','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'}
  :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
+async function discoverModels(p){
+try{
+ const r=await fetchT(p.url.replace('/chat/completions','/models'),9000);
+ if(!r.ok)return[];
+ const d=await r.json();
+ return (d.data||[]).map(x=>x.id);
+}catch(e){return[]}}
+async function modelList(p){
+const avail=await discoverModels(p);
+let list=[];
+if(avail.length){
+ list=p.models.filter(m=>avail.includes(m));
+ const rest=avail.filter(id=>!list.includes(id)&&!/whisper|tts|embed|guard|moderat|transcrib/i.test(id));
+ list=list.concat(rest);
+}
+if(!list.length)list=p.models.slice();
+return list}
 async function aiCall(userMsg){
-const p=prov();let lastErr='';
-for(const m of p.models){
+const p=prov();
+const list=await modelList(p);
+let lastErr='';
+for(const m of list){
  try{
   const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,temperature:0.5,messages:[{role:'system',content:MASTER},{role:'user',content:userMsg}]})});
-  if(res.ok){const d=await res.json();return{text:d.choices[0].message.content,model:m,prov:p.name}}
+  if(res.ok){const d=await res.json();state.lastModel=p.name+' / '+m;return{text:d.choices[0].message.content,model:m,prov:p.name}}
   const body=await res.text();
   lastErr=p.name+' '+m+' → HTTP '+res.status+': '+body.slice(0,140);
   if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.');
@@ -275,24 +292,27 @@ throw new Error(lastErr||'All AI models failed');
 }
 async function testKey(){
 if(!state.apiKey)return toast('⚠️ Paste a key first');
-toast('🩺 Testing your key…');
-const p=prov();const log=[];
-for(const m of p.models){
+toast('🩺 Testing your key…');const p=prov();
+const avail=await discoverModels(p);
+const list=await modelList(p);
+const log=['Models alive on your key today: '+(avail.length?avail.slice(0,6).join(', ')+(avail.length>6?'…':''):'(could not list — trying known names)')];
+for(const m of list.slice(0,3)){
  try{
   const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,max_tokens:5,messages:[{role:'user',content:'Say OK'}]})});
   const body=await res.text();
-  if(res.ok){state.lastModel=p.name+' / '+m;state.testLog='✅ KEY WORKS on '+p.name+' / '+m;toast('✅ Key works on '+m);render();return}
+  if(res.ok){state.lastModel=p.name+' / '+m;state.testLog=log.join('\n')+'\n✅ KEY WORKS on '+m;toast('✅ Key works on '+m);render();return}
   log.push('❌ '+m+' → HTTP '+res.status+' '+body.slice(0,100));
  }catch(e){log.push('❌ '+m+' → '+String(e).slice(0,80))}
 }
-state.testLog=log.join('\n');toast('❌ Key failed all models — see log in Settings');render();
+state.testLog=log.join('\n');toast('❌ See log in Settings');render();
 }
 async function testFeeds(){
 toast('🛰 Testing feed routes…');
 const log=[];
 try{
  const r=await fetchT('/api/feeds',12000);let n=0;
- try{const d=await r.json();n=(d.items||[]).length}catch(e){} log.push('/api/feeds (your Vercel relay) → HTTP '+r.status+', '+n+' items'+(r.status===404?' — MISSING: Vercel Settings → Framework Preset = Other, then Redeploy':''));
+ try{const d=await r.json();n=(d.items||[]).length}catch(e){}
+ log.push('/api/feeds (your Vercel relay) → HTTP '+r.status+', '+n+' items'+(r.status===404?' — MISSING: Vercel Settings → Framework Preset = Other, then Redeploy':''));
 }catch(e){log.push('/api/feeds → network error')}
 try{const r=await fetchT('https://content.guardianapis.com/search?page-size=1&api-key=test',9000);log.push('Guardian API (CORS-native) → HTTP '+r.status)}catch(e){log.push('Guardian API → blocked')}
 try{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml'),10000);log.push('allorigins proxy → HTTP '+r.status)}catch(e){log.push('allorigins proxy → blocked/timeout on this network')}
@@ -321,8 +341,7 @@ marks.sort((a,b)=>a.s-b.s);
 const obj={};
 for(let i=0;i<marks.length;i++){
  const start=marks[i].e;
- const end=i+1<marks.length?marks[i+1].s:t.length;
- obj[marks[i].k]=t.slice(start,end);
+ const end=i+1<marks.length?marks[i+1].s:t.length; obj[marks[i].k]=t.slice(start,end);
 }
 return obj;
 }
@@ -335,13 +354,13 @@ try{
  if(!it.raw){try{const j=await fetch('https://r.jina.ai/'+it.link);it.raw=(await j.text()).slice(0,9000)}catch(e){}}
  const userMsg=(angle?'REGENERATE with a clearly different angle (human vs institutional). Previous FB version to differ from:\n'+((state.out[id]&&state.out[id].fb)||'')+'\n\n':'')+'SOURCE: '+it.source+'\nHEADLINE: '+it.title+'\nFULL TEXT:\n'+(it.raw||it.title);
  const r=await aiCall(userMsg);
- state.lastModel=r.prov+' / '+r.model;
  let out=parseAI(r.text)||{title:it.title,fb:r.text};
  ['title','fb','tw','vo','cm','full','ip'].forEach(k=>out[k]=cleanVal(out[k]));
  out.full=stripBlog(out.full);
  if(!out.title)out.title=it.title;
  if(!out.fb)out.fb=out.title;
- if(out.tw&&out.tw.length>280)out.tw=out.tw.slice(0,277).replace(/\s+\S*$/,'')+'…'; state.out[id]=out;
+ if(out.tw&&out.tw.length>280)out.tw=out.tw.slice(0,277).replace(/\s+\S*$/,'')+'…';
+ state.out[id]=out;
  it.busy=false;toast(angle?'⟳ Fresh angle ready ('+r.model+')':'⚡ Generated via '+r.model);render();
 }catch(e){
  it.busy=false;it.error=true;
@@ -371,8 +390,7 @@ let img=(o.edit&&o.edit.img)?o.edit.img:'';
 if(o.imgB64){await ghUpsert(repo,'blog/img/'+slug+'.jpg',o.imgB64,'Image: '+title);img=location.origin+'/blog/img/'+slug+'.jpg'}
 const desc=bodyText.replace(/\s+/g,' ').slice(0,160);
 const url=location.origin+'/blog/'+slug+'.html';
-await ghUpsert(repo,'blog/'+slug+'.html',b64t(blogHTML({title,desc,source,img,body:bodyText,url})),'Publish: '+title);
-const meta=await ghGetMeta(repo,'blog/index.json');
+await ghUpsert(repo,'blog/'+slug+'.html',b64t(blogHTML({title,desc,source,img,body:bodyText,url})),'Publish: '+title);const meta=await ghGetMeta(repo,'blog/index.json');
 let idx=[];if(meta&&meta.content){try{idx=JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/\n/g,'')))))}catch(e){}}
 const old=idx.find(pp=>pp.id===slug);
 const entry={id:slug,title,desc,source:source||'D-Ray Show',img,date:old?old.date:new Date().toISOString(),url,body:bodyText};
@@ -390,7 +408,8 @@ function panelHTML(it){const t=state.tab[it.id]||'fb';const o=state.out[it.id];
 return `${o.title?`<div class="hd">📰 ${esc(o.title)}</div>`:''}
 <div class="tabs">${TABS.map(([k,l])=>`<button class="tab ${t===k?'on':''}" data-act="tab" data-id="${it.id}" data-t="${k}">${l}</button>`).join('')}</div>
 <div class="row"><button class="save" data-act="save" data-id="${it.id}">💾 SAVE</button><button class="pub" data-act="publish" data-id="${it.id}">📤 PUBLISH</button><button class="copy" data-act="copy" data-id="${it.id}">📋 COPY</button></div>
-<div class="out">${esc(o[t]||'')}</div><div class="credit">Credit: ${esc(it.source)}</div>`}function cardHTML(it){
+<div class="out">${esc(o[t]||'')}</div><div class="credit">Credit: ${esc(it.source)}</div>`}
+function cardHTML(it){
 const badge=it.busy?'<div class="ready busyb"><span class="spinner"></span>AI WRITING…</div>':(it.error?'<div class="ready errb">⚠ RETRY BELOW</div>':'<div class="ready"><span class="dot"></span>READY</div>');
 return `<div class="card">${badge}<h3>${esc(it.title)}</h3>
 <div class="meta">🕒 Posted ${fmt(it.ts)} GMT • <span class="${(Date.now()-it.ts)<600000?'fresh':''}">${agoLabel(it.ts)}</span> • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}</div>
@@ -400,7 +419,7 @@ function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v11 • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v12 • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
 if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
@@ -415,13 +434,12 @@ ${state.pendingImg?`<img src="data:image/jpeg;base64,${state.pendingImg}" style=
 ${state.blogLoading?'<div class="empty">Loading published posts…</div>':(state.blog&&state.blog.length?state.blog.map((p,i)=>`<div class="card"><h3>${esc(p.title)}</h3><div class="meta">${new Date(p.date).toUTCString().slice(0,22)} GMT${p.source?' • Source: '+esc(p.source):''}</div><div class="btns"><button class="copy" data-act="blogcopy" data-i="${i}">🔗 COPY LINK</button><button class="save" data-act="blogshare" data-i="${i}">📤 SHARE</button><button class="save" data-act="blogopen" data-i="${i}">🌐 OPEN</button><button class="save" data-act="blogedit" data-i="${i}">✏️ EDIT</button></div></div>`).join(''):'<div class="empty">Nothing published yet.<br>Generate a story and tap 📤 PUBLISH, or tap ✍ CREATE NEWS.</div>')}`;return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card">${d.out&&d.out.title?`<div class="hd">📰 ${esc(d.out.title)}</div>`:''}<h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
 if(v==='set'){$('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v11</em></div>
+<div class="set"><span>🏗 Build</span><em>v12</em></div>
 <div class="set"><span>🛰 News route</span><em>${state.relay?'⚡ Vercel relay active':(state.relayCode===404?'🛠 relay auto-healing':'🌐 proxy+Guardian mode')}</em></div>
 <button class="re" style="width:100%" data-act="installrelay">🛠 INSTALL NEWS RELAY (api/feeds.js)</button>
 <button class="re" style="width:100%;margin-top:8px" data-act="testfeeds">🛰 FEEDS TEST</button>
 ${state.feedLog?`<div class="out" style="margin-top:10px">${esc(state.feedLog)}</div>`:''}
-<div class="set" style="margin-top:10px"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected</span></div>
-<input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-... or gsk-..." style="max-width:none">
+<div class="set" style="margin-top:10px"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected • models auto-discovered</span></div><input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-... or gsk-..." style="max-width:none">
 <button class="gen" style="width:100%" data-act="savekey">💾 SAVE KEY</button>
 <button class="re" style="width:100%;margin-top:8px" data-act="testkey">🩺 TEST KEY</button>
 ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}</div>`:''}
@@ -439,7 +457,8 @@ document.addEventListener('click',e=>{
 const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
  if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
- else toast('❌ Invalid username or PIN');return}if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
+ else toast('❌ Invalid username or PIN');return}
+if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
 if(d.act==='refresh'){toast('🔄 Scanning all channels…');checkFeeds();return}
 if(d.act==='gen'){gen(d.id,false);return}
 if(d.act==='regen'){gen(d.id,true);return}
@@ -469,8 +488,7 @@ if(d.act==='testfeeds'){testFeeds();return}
 if(d.act==='savekey'){state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
 if(d.act==='savegh'){state.ghToken=$('#ghToken').value.trim();state.ghRepo=$('#ghRepo').value.trim();localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);toast('✅ GitHub saved');return}
 if(d.act==='testkey'){testKey();return}
-if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
-if(d.act==='sample'){loadSamples();return}
+if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}if(d.act==='sample'){loadSamples();return}
 });
 document.addEventListener('change',e=>{
 if(e.target.dataset&&e.target.dataset.set==='sound')state.sound=e.target.checked;
