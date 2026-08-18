@@ -94,7 +94,7 @@ nav button.on{color:var(--blue2)}
 <script>
 const $=s=>document.querySelector(s);
 const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
-const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:JSON.parse(localStorage.getItem('drs_cache')||'[]'),seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',feedLog:'',scanning:false,blog:null,blogLoading:false,composing:false,editing:null,pendingImg:null,relay:false,relayCode:0,healed:false,synced:false};
+const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:JSON.parse(localStorage.getItem('drs_cache')||'[]'),seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',feedLog:'',scanning:false,blog:null,blogLoading:false,composing:false,editing:null,pendingImg:null,relay:false,relayCode:0,healed:false,synced:false,master:'',masterText:null,editBrain:false,brainText:''};
 const isBoss=()=>state.user==='admin1';
 const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');const safeJson=r=>r.text().then(t=>{try{return JSON.parse(t)}catch(e){return null}});
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
@@ -109,6 +109,55 @@ if(h<24)return h+' hours ago';
 return Math.floor(h/24)+'d ago'}
 function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',4200)}
 function beep(){if(!state.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.18)}catch(e){}}
+
+/* ---- the editorial brain now lives in editorial.txt (editable without touching index.html) ---- */
+const DEFAULT_EDITORIAL=`[CORE]
+You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update"), a media house covering sports, politics and current happenings worldwide.
+CORE RULES:
+- Treat the source text ONLY as facts. Rebuild the story from scratch (WHO/WHAT/WHERE/WHEN/WHY/HOW). Never copy sentences, phrases or paragraph order from the source.
+- Never invent facts, quotes, statistics or statements. If unverified, label it ("according to...", "the claim has not been independently verified").
+- Lead with the most important confirmed development. Short punchy sentences for impact. Professional human newsroom tone. No robotic AI phrases ("Furthermore", "Moreover", "It is worth noting", "This underscores").
+- No clickbait, no sensationalism. Facts first, clarity second, engagement third.
+- Deaths/crimes/disasters/allegations: respectful language, "police allege", "the suspect"; never present allegations as convictions.
+CREDIT RULE (never skip): "📰 Credit: {Source Name}".
+BRAND SIGN-OFF: "📺 D-Ray Show — Your Daily Global Update."
+SOCIAL HANDLES to append at the end of social formats: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport
+
+[TITLE]
+a Fox-News-style crafted headline — maximum 8 words, punchy present-tense, strong verb, clear, specific, factual, ALL-CAPS-ready, search-friendly, no clickbait, no emoji.
+
+[FB]
+Facebook & Instagram post. Line 1 = the title. Blank line. Then 🚨 lead sentence. Then "WHAT WE KNOW SO FAR:" with short bullet lines starting with •. Then "WHAT HAPPENS NEXT:" one line. Then credit line, brand sign-off, "Follow for updates as this story develops.", then 3-5 hashtags including #DRayShow. Meta-policy safe.
+
+[TW]
+the tweet ONLY, maximum 280 characters: one fact + one status line + "📰 via {Source}" + max 2 hashtags.
+
+[VO]
+30-second TikTok/YouTube voice-over script, plain spoken lines with timecodes: 0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro. Include [ON SCREEN] cues with red BREAKING strap + country + logo bug. Fixed outro: "Follow D-Ray Show — your daily global update." End with [END CARD: royal-blue frame, red stripe, YOUR DAILY GLOBAL UPDATE].
+
+[CM]
+commentary in plain blocks: line 1 the title, then WHY IT MATTERS: one short paragraph, THE KEY QUESTION: one line, OUR LINE AS A SHOW: one balanced sentence ending on the D-Ray standard.
+
+[FULL]
+a professional, medium-length blog news article of 4-6 flowing paragraphs (about 350-500 words). Write it exactly like a human journalist's blog post: paragraph 1 states the news immediately; the following paragraphs weave in the key details, background context, properly attributed statements and why it matters; the final paragraph states what is still unknown or what happens next. ABSOLUTELY NO labels or headings inside. ABSOLUTELY NO "SEO TITLE", NO "META DESCRIPTION", NO "KEYWORDS". Just clean paragraphs separated by blank lines, every fact intact, nothing invented.
+
+[IP]
+THE STANDARDIZED D-RAY SHOW 4:5 BREAKING-NEWS FLYER PROMPT (1080x1350), international broadcast standard like Fox News, Sky News and BBC Breaking — VERY BRIGHT, CINEMATIC, SATURATED, GLOSSY, CATCHY. Build EVERY image with this exact anatomy: (1) SCENE: photorealistic cinematic editorial photo built ONLY from the confirmed facts of this story, bright studio-grade key light, blue and red rim lighting, shallow depth of field, crisp detail, no identifiable faces of real people, no third-party logos or watermarks; (2) TOP-LEFT brand lockup, exactly: the D-Ray Show shield logo — shield split royal-blue left / signal-red right, big white letter R, red lightning bolt through it — next to the wordmark "D RAY SHOW" where "D RAY" is royal blue and "SHOW" is signal red with a blue wireframe globe replacing the O, small grey tagline beneath "YOUR DAILY GLOBAL UPDATE"; (3) TOP-RIGHT: glowing signal-red chip "BREAKING NEWS" in bold white condensed capitals (use "DEVELOPING STORY" when not breaking); (4) BOTTOM THIRD Fox-style: thick signal-red headline bar with the story headline in HUGE white ultra-bold condensed ALL-CAPS (max 6-8 words, present tense, punchy, perfect spelling), beneath it a deep royal-blue ticker bar with small white capitals "YOUR DAILY GLOBAL UPDATE • LATEST UPDATES • GLOBAL COVERAGE • UNBIASED REPORTING"; (5) small dark chip with country flag + GMT time; (6) COLOR GRADE: royal blue #1E5AA8 to #3F8EDC with signal red #C62828 to #E53935 accents, brilliant whites, high contrast, glossy finish, safe margins; (7) all text perfect spelling, sharp kerning. End with: --ar 4:5`;
+
+function parseSections(t){const o={};let k=null;
+t.split('\n').forEach(L=>{const m=/^\[([A-Z]+)\]\s*$/.exec(L.trim());if(m){k=m[1];o[k]='';}else if(k){o[k]+=L+'\n'}});
+Object.keys(o).forEach(k=>o[k]=o[k].trim());
+return o}
+function buildMaster(o){
+return (o.CORE||'')+'\n\nOUTPUT: return ONLY a valid JSON object that STARTS with { and ENDS with } with exactly these 7 keys. Every value must be PLAIN TEXT: no markdown, no asterisks, no quotation marks around the value, no key labels inside the value, no code fences.\n"title": '+(o.TITLE||'')+'\n"fb": '+(o.FB||'')+'\n"tw": '+(o.TW||'')+'\n"vo": '+(o.VO||'')+'\n"cm": '+(o.CM||'')+'\n"full": '+(o.FULL||'')+'\n"ip": '+(o.IP||'')+'\nREGENERATE rule: take a clearly different angle (human angle vs institutional angle), never a synonym swap.'}
+async function loadEditorial(){
+try{
+ const r=await fetch('/editorial.txt?ts='+Date.now(),{cache:'no-store'});
+ if(r.ok){const t=await r.text();
+  if(t&&t.includes('[CORE]')){state.masterText=t;state.master=buildMaster(parseSections(t));return}}
+}catch(e){}
+state.masterText=null;state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
+}
 
 const AI_JS=`let K={};try{K=require('./keys.js')}catch(e){}
 const KEY=process.env.AI_KEY||(K.AI_B64?Buffer.from(K.AI_B64,'base64').toString('utf8'):'');
@@ -191,34 +240,13 @@ module.exports=async function handler(req,res){
 `;
 function keysCode(){return 'module.exports={AI_B64:'+JSON.stringify(b64t(state.apiKey.trim()))+',GH_B64:'+JSON.stringify(b64t(state.ghToken.trim()))+',GH_REPO:'+JSON.stringify(state.ghRepo.trim())+'};\n'}
 
-const MASTER=`You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update"), a media house covering sports, politics and current happenings worldwide.
-CORE RULES:
-- Treat the source text ONLY as facts. Rebuild the story from scratch (WHO/WHAT/WHERE/WHEN/WHY/HOW). Never copy sentences, phrases or paragraph order from the source.
-- Never invent facts, quotes, statistics or statements. If unverified, label it ("according to...", "the claim has not been independently verified").- Lead with the most important confirmed development. Short punchy sentences for impact. Professional human newsroom tone. No robotic AI phrases ("Furthermore", "Moreover", "It is worth noting", "This underscores").
-- No clickbait, no sensationalism. Facts first, clarity second, engagement third.
-- Deaths/crimes/disasters/allegations: respectful language, "police allege", "the suspect"; never present allegations as convictions.
-CREDIT RULE (never skip): "📰 Credit: {Source Name}".
-BRAND SIGN-OFF: "📺 D-Ray Show — Your Daily Global Update."
-SOCIAL HANDLES to append at the end of social formats: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport
-
-OUTPUT: return ONLY a valid JSON object that STARTS with { and ENDS with } with exactly these 7 keys. Every value must be PLAIN TEXT: no markdown, no asterisks, no quotation marks around the value, no key labels inside the value, no code fences.
-"title": a Fox-News-style crafted headline — maximum 8 words, punchy present-tense, strong verb, clear, specific, factual, ALL-CAPS-ready, search-friendly, no clickbait, no emoji.
-"fb": Facebook & Instagram post. Line 1 = the title. Blank line. Then 🚨 lead sentence. Then "WHAT WE KNOW SO FAR:" with short bullet lines starting with •. Then "WHAT HAPPENS NEXT:" one line. Then credit line, brand sign-off, "Follow for updates as this story develops.", then 3-5 hashtags including #DRayShow. Meta-policy safe.
-"tw": the tweet ONLY, maximum 280 characters: one fact + one status line + "📰 via {Source}" + max 2 hashtags.
-"vo": 30-second TikTok/YouTube voice-over script, plain spoken lines with timecodes: 0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro. Include [ON SCREEN] cues with red BREAKING strap + country + logo bug. Fixed outro: "Follow D-Ray Show — your daily global update." End with [END CARD: royal-blue frame, red stripe, YOUR DAILY GLOBAL UPDATE].
-"cm": commentary in plain blocks: line 1 the title, then WHY IT MATTERS: one short paragraph, THE KEY QUESTION: one line, OUR LINE AS A SHOW: one balanced sentence ending on the D-Ray standard.
-"full": a professional, medium-length blog news article of 4-6 flowing paragraphs (about 350-500 words). Write it exactly like a human journalist's blog post: paragraph 1 states the news immediately; the following paragraphs weave in the key details, background context, properly attributed statements and why it matters; the final paragraph states what is still unknown or what happens next. ABSOLUTELY NO labels or headings inside (never write "BREAKING NEWS HEADLINE:", "SUBHEAD:", "THE NEWS:", "KEY DETAIL:", "CONTEXT:", "RESPONSE:", "WHY IT MATTERS:", "FINAL:"). ABSOLUTELY NO "SEO TITLE", NO "META DESCRIPTION", NO "KEYWORDS". Just clean paragraphs separated by blank lines, every fact intact, nothing invented.
-"ip": THE STANDARDIZED D-RAY SHOW 4:5 BREAKING-NEWS FLYER PROMPT (1080x1350), international broadcast standard like Fox News, Sky News and BBC Breaking — VERY BRIGHT, CINEMATIC, SATURATED, GLOSSY, CATCHY. Build EVERY image with this exact anatomy: (1) SCENE: a photorealistic cinematic editorial photo built ONLY from the confirmed facts of this story, dramatic but truthful, bright studio-grade key light, blue and red rim lighting, shallow depth of field, crisp detail, no identifiable faces of real people, no third-party logos or watermarks; (2) TOP-LEFT brand lockup, exactly: the D-Ray Show shield logo — a shield split royal-blue on the left and signal-red on the right, big white letter R in the center, a red lightning bolt striking vertically through it — placed next to the wordmark "D RAY SHOW" where "D RAY" is royal blue and "SHOW" is signal red with a blue wireframe globe icon replacing the letter O, and beneath it the small grey tagline "YOUR DAILY GLOBAL UPDATE"; (3) TOP-RIGHT: a glowing signal-red rounded chip reading "BREAKING NEWS" in bold white condensed capitals (use "DEVELOPING STORY" instead when the story is not a breaking event); (4) BOTTOM THIRD, Fox-News style: a thick signal-red headline bar carrying the story headline in HUGE white ultra-bold condensed ALL-CAPS letters (maximum 6-8 words, present tense, punchy, spelled perfectly), and directly beneath it a deep royal-blue ticker bar with small white capitals reading "YOUR DAILY GLOBAL UPDATE • LATEST UPDATES • GLOBAL COVERAGE • UNBIASED REPORTING"; (5) a small dark chip beside the headline showing the country flag emoji and the time in GMT; (6) COLOR GRADE: royal blue gradient #1E5AA8 to #3F8EDC with signal red gradient #C62828 to #E53935 accents, brilliant clean whites, high contrast, glossy finish, sharp clean edges, generous safe margins so nothing important is cropped; (7) all text rendered with perfect spelling, sharp kerning and broadcast-quality clarity. End the prompt with: --ar 4:5
-REGENERATE rule: take a clearly different angle (human angle vs institutional angle), never a synonym swap.`;
-
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
-{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
-{region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
-{region:'world',flag:'🇶',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
-{region:'nigeria',flag:'🇳',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},{region:'world',flag:'🇬',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
+{region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
+{region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
+{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
@@ -244,6 +272,7 @@ try{
  const d=await safeJson(r);
  return ((d.response&&d.response.results)||[]).map(x=>({title:x.webTitle,link:x.webUrl,pub:x.webPublicationDate,region:'world',flag:'🌍',country:'World',src:'The Guardian',goog:false}));
 }catch(e){return[]}}
+
 async function gather(){
 try{
  const r=await fetchT('/api/feeds',15000);
@@ -263,8 +292,7 @@ return all}
 
 async function checkFeeds(){
 state.scanning=true;if(state.view==='dash')render();
-const items=await gather();
-if((state.relayCode===404||state.relayCode===500)&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.healed){
+const items=await gather();if((state.relayCode===404||state.relayCode===500)&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.healed){
  state.healed=true;
  toast('🛠 Relay missing — auto-installing…');
  ghUpsert(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Auto-install D-Ray news relay')
@@ -292,6 +320,7 @@ state.lastScan=Date.now();state.scanning=false;
 if(add>0){toast('🟢 '+add+' new stories added to the Desk');beep()}
 if(!state.arrived.length){loadSamples();toast('⚠️ Every route blocked on this network — samples loaded')}
 if(state.view==='dash'||state.view==='alerts')render()}
+
 function loadSamples(){
 if(state.sampled)return;state.sampled=true;
 [{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹',c:'Turkey',r:'world'},
@@ -312,8 +341,7 @@ try{
 }catch(e){return[]}}
 async function modelList(p){
 const avail=await discoverModels(p);
-let list=[];
-if(avail.length){
+let list=[];if(avail.length){
  list=p.models.filter(m=>avail.includes(m));
  const rest=avail.filter(id=>!list.includes(id)&&!/whisper|tts|embed|guard|moderat|transcrib/i.test(id));
  list=list.concat(rest);
@@ -321,6 +349,7 @@ if(avail.length){
 if(!list.length)list=p.models.slice();
 return list}
 async function aiCall(userMsg){
+if(!state.master)state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
 try{
  const r=await fetchT('/api/ai',60000);
  if(r.ok){const d=await safeJson(r);if(d&&d.text){state.lastModel='Server / '+d.model;return{text:d.text,model:d.model,prov:'Server'}}}
@@ -341,7 +370,8 @@ const list=await modelList(p);
 let lastErr='';
 for(const m of list){
  try{
-  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,temperature:0.5,messages:[{role:'system',content:MASTER},{role:'user',content:userMsg}]})});  const body=await res.text();
+  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,temperature:0.5,messages:[{role:'system',content:state.master},{role:'user',content:userMsg}]})});
+  const body=await res.text();
   if(res.ok){let d=null;try{d=JSON.parse(body)}catch(e){}
    if(d&&d.choices){state.lastModel=p.name+' / '+m;return{text:d.choices[0].message.content,model:m,prov:p.name}}}
   lastErr=p.name+' '+m+' → HTTP '+res.status+': '+body.slice(0,140);
@@ -360,8 +390,7 @@ const log=['Models alive on your key today: '+(avail.length?avail.slice(0,6).joi
 for(const m of list.slice(0,3)){
  try{
   const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,max_tokens:5,messages:[{role:'user',content:'Say OK'}]})});
-  const body=await res.text();
-  if(res.ok){state.lastModel=p.name+' / '+m;state.testLog=log.join('\n')+'\n✅ KEY WORKS on '+m;toast('✅ Key works on '+m);render();return}
+  const body=await res.text();  if(res.ok){state.lastModel=p.name+' / '+m;state.testLog=log.join('\n')+'\n✅ KEY WORKS on '+m;toast('✅ Key works on '+m);render();return}
   log.push('❌ '+m+' → HTTP '+res.status+' '+body.slice(0,100));
  }catch(e){log.push('❌ '+m+' → '+String(e).slice(0,80))}
 }
@@ -390,7 +419,8 @@ try{
  const s=t.indexOf('{'),e=t.lastIndexOf('}');
  if(s>-1&&e>s)return JSON.parse(t.slice(s,e+1));
 }catch(e){}
-const keys=['title','fb','tw','vo','cm','full','ip'];const marks=[];
+const keys=['title','fb','tw','vo','cm','full','ip'];
+const marks=[];
 for(const k of keys){
  const re=new RegExp('["\'\\*\\s\\n{,]*'+k+'["\'\\*]*\\s*:','i');
  const m=re.exec(t);
@@ -409,8 +439,7 @@ return obj;
 
 async function gen(id,angle){
 const it=state.arrived.find(x=>x.id===id);if(!it||it.busy)return;
-it.busy=true;it.error=false;render();
-try{
+it.busy=true;it.error=false;render();try{
  if(!it.raw){try{const j=await fetch('https://r.jina.ai/'+it.link);it.raw=(await j.text()).slice(0,9000)}catch(e){}}
  const userMsg=(angle?'REGENERATE with a clearly different angle (human vs institutional). Previous FB version to differ from:\n'+((state.out[id]&&state.out[id].fb)||'')+'\n\n':'')+'SOURCE: '+it.source+'\nHEADLINE: '+it.title+'\nFULL TEXT:\n'+(it.raw||it.title);
  const r=await aiCall(userMsg);
@@ -439,7 +468,8 @@ async function ghUpsertLocal(repo,path,b64,msg){
 if(!state.ghToken.trim()||!repo)throw new Error('Admin1: save GitHub token + repo in Settings first');
 if(!repo.includes('/'))throw new Error('Repo must be username/repo-name — re-save GitHub in Settings');
 const meta=await ghGetMeta(repo,path);
-const body={message:msg,content:b64};if(meta&&meta.sha)body.sha=meta.sha;
+const body={message:msg,content:b64};
+if(meta&&meta.sha)body.sha=meta.sha;
 const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{...ghAuth(),'Content-Type':'application/json'},body:JSON.stringify(body)});
 if(!r.ok){const t=await r.text();throw new Error('GitHub '+r.status+' '+t.slice(0,90))}
 return await safeJson(r)||{}}
@@ -458,8 +488,7 @@ const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.title
 return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.title)+' | D-Ray Show Blog News</title><meta name="description" content="'+esc(p.desc)+'"><link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.title)+'"><meta property="og:description" content="'+esc(p.desc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+(p.img||location.origin+'/logo.png')+'"><meta property="og:site_name" content="D-Ray Show Blog News"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#F7F8FC;color:#101828}header{background:#0A1220;color:#fff;padding:18px 16px}header h1{margin:0;font:800 20px Arial}header h1 b{color:#E53935}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px}.meta{color:#8A97AB;font:12px Arial;margin-bottom:14px}img.hero{width:100%;border-radius:12px;margin:0 0 18px}p{margin:0 0 16px}.cred{background:#0A1220;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6}footer{color:#8A97AB;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#1E5AA8}</style></head><body><header><div class="wrap"><h1>D RAY <b>SHOW</b> BLOG NEWS</h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.title)+'</h2><p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • D-Ray Show Blog News</p>'+(p.img?'<img class="hero" src="'+p.img+'" alt="'+esc(p.title)+'">':'')+paras+'<div class="cred">📰 Credit: '+esc(p.source||'D-Ray Show')+'<br>📺 D-Ray Show — Your Daily Global Update.<br>Follow: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport • <a href="'+location.origin+'/blog/" style="color:#7FB4F5">Read more at D-Ray Show Blog News</a></div></main><footer>© D-Ray Show Blog News • Latest Updates. Global Coverage. Unbiased Reporting.</footer></body></html>'}
 async function publishToBlog(title,bodyText,source,o){
 o=o||{};
-const repo=state.ghRepo.trim()||'server';
-const slug=o.edit?o.edit.id:((title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'post')+'-'+Date.now().toString(36));
+const repo=state.ghRepo.trim()||'server';const slug=o.edit?o.edit.id:((title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'post')+'-'+Date.now().toString(36));
 let img=(o.edit&&o.edit.img)?o.edit.img:'';
 if(o.imgB64){await ghUpsert(repo,'blog/img/'+slug+'.jpg',o.imgB64,'Image: '+title);img=location.origin+'/blog/img/'+slug+'.jpg'}
 const desc=bodyText.replace(/\s+/g,' ').slice(0,160);
@@ -488,14 +517,15 @@ function cardHTML(it){
 const badge=it.busy?'<div class="ready busyb"><span class="spinner"></span>AI WRITING…</div>':(it.error?'<div class="ready errb">⚠ RETRY BELOW</div>':'<div class="ready"><span class="dot"></span>READY</div>');
 return `<div class="card">${badge}<h3>${esc(it.title)}</h3>
 <div class="meta">🕒 Posted ${fmt(it.ts)} GMT • <span class="${(Date.now()-it.ts)<600000?'fresh':''}">${agoLabel(it.ts)}</span> • ${it.flag} ${it.country} • Source: ${esc(it.source)}${it.sample?' <span class="chipS">🧪 SAMPLE</span>':''}</div>
-<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>${state.out[it.id]?panelHTML(it):''}</div>`}
+<div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>
+${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v16 • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • auto-scan 3 min • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v17 • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
 <div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ ${state.composing?'✖ CLOSE':'CREATE NEWS'}</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
 ${state.composing?`<div class="card">${state.editing?'<div class="hd">✏️ EDITING: '+esc(state.editing.title)+'</div>':''}
@@ -507,13 +537,17 @@ ${state.pendingImg?`<img src="data:image/jpeg;base64,${state.pendingImg}" style=
 <button class="pub" style="width:100%" data-act="pubmanual">🚀 ${state.editing?'UPDATE POST':'PUBLISH TO BLOG'}</button></div>`:''}
 ${state.blogLoading?'<div class="empty">Loading published posts…</div>':(state.blog&&state.blog.length?state.blog.map((p,i)=>`<div class="card"><h3>${esc(p.title)}</h3><div class="meta">${new Date(p.date).toUTCString().slice(0,22)} GMT${p.source?' • Source: '+esc(p.source):''}</div><div class="btns"><button class="copy" data-act="blogcopy" data-i="${i}">🔗 COPY LINK</button><button class="save" data-act="blogshare" data-i="${i}">📤 SHARE</button><button class="save" data-act="blogopen" data-i="${i}">🌐 OPEN</button><button class="save" data-act="blogedit" data-i="${i}">✏️ EDIT</button></div></div>`).join(''):'<div class="empty">Nothing published yet.<br>Generate a story and tap 📤 PUBLISH, or tap ✍ CREATE NEWS.</div>')}`;return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card">${d.out&&d.out.title?`<div class="hd">📰 ${esc(d.out.title)}</div>`:''}<h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
-if(v==='set'){
-const boss=isBoss();
+if(v==='set'){const boss=isBoss();
 $('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v16</em></div>
+<div class="set"><span>🏗 Build</span><em>v17</em></div>
 <div class="set"><span>🛰 News route</span><em>${state.relay?'⚡ Vercel relay active':(state.relayCode===404?'🛠 relay auto-healing':'🌐 proxy+Guardian mode')}</em></div>
+<div class="set"><span>🧠 Editorial brain</span><em>${state.masterText?'📄 editorial.txt live':'built-in default'}</em></div>
 ${boss?`
-<button class="pub" style="width:100%" data-act="synckeys">☁️ SYNC KEYS TO SERVER (one-time)</button>
+<button class="re" style="width:100%" data-act="brainopen">📝 ${state.editBrain?'✖ CLOSE EDITOR':'OPEN EDITORIAL EDITOR'}</button>
+${state.editBrain?`<textarea id="brainBox" rows="12" style="max-width:none;font:400 12px/1.5 Inter;margin-top:8px">${esc(state.brainText||'')}</textarea>
+<button class="pub" style="width:100%;margin-top:6px" data-act="brainsave">💾 SAVE EDITORIAL FILE</button>
+<button class="re" style="width:100%;margin-top:6px" data-act="brainreset">↺ RESET TO DEFAULT</button>`:''}
+<button class="pub" style="width:100%;margin-top:8px" data-act="synckeys">☁️ SYNC KEYS TO SERVER (one-time)</button>
 <button class="re" style="width:100%;margin-top:8px" data-act="installrelay">🛠 INSTALL NEWS RELAY (api/feeds.js)</button>
 <div class="set" style="margin-top:10px"><span>🔑 AI Key — xAI Grok (xai-…) or Groq (gsk-…) • auto-detected</span></div>
 <input id="keyInput" type="password" value="${esc(state.apiKey)}" placeholder="xai-... or gsk-..." style="max-width:none">
@@ -524,7 +558,7 @@ ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}<
 <input id="ghToken" type="password" value="${esc(state.ghToken)}" placeholder="ghp_..." style="max-width:none">
 <input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="repo-name or username/repo-name" style="max-width:none">
 <button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
-<div class="empty" style="padding:8px 10px">🔐 Keys are stored ENCODED on the server — GitHub's guard approves. Still make the repo PRIVATE when done.</div>`
+<div class="empty" style="padding:8px 10px">🔐 Keys are stored ENCODED on the server. Make the repo PRIVATE when done.</div>`
 :`<div class="set"><span>🔐 AI & publishing keys</span><em>✅ managed on server by Admin1</em></div>
 <div class="empty" style="padding:8px 10px">You don't need any keys on this phone. Just log in and work. 🟢</div>`}
 <button class="re" style="width:100%;margin-top:8px" data-act="testfeeds">🛰 FEEDS TEST</button>
@@ -537,7 +571,8 @@ ${state.feedLog?`<div class="out" style="margin-top:10px">${esc(state.feedLog)}<
 
 document.addEventListener('click',async e=>{
 const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
-if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value; if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
+if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
+ if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
  else toast('❌ Invalid username or PIN');return}
 if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
 if(d.act==='refresh'){toast('🔄 Scanning all channels…');checkFeeds();return}
@@ -551,8 +586,7 @@ if(d.act==='publish'){const it=state.arrived.find(x=>x.id===d.id);const o=state.
  if(!o||!o.full)return toast('⚡ Generate first — Full Article tab');
  toast('📤 Publishing…');
  publishToBlog(o.title||it.title,o.full,it.source).then(()=>toast('🚀 LIVE! Link in Blog tab')).catch(er=>toast('⚠️ '+er.message));return}
-if(d.act==='compose'){state.composing=!state.composing;if(!state.composing){state.editing=null;state.pendingImg=null}render();return}
-if(d.act==='pubmanual'){const t=$('#cTitle').value.trim(),bo=stripBlog($('#cBody').value.trim()),so=$('#cSource').value.trim();
+if(d.act==='compose'){state.composing=!state.composing;if(!state.composing){state.editing=null;state.pendingImg=null}render();return}if(d.act==='pubmanual'){const t=$('#cTitle').value.trim(),bo=stripBlog($('#cBody').value.trim()),so=$('#cSource').value.trim();
  if(!t||!bo)return toast('⚠️ Title + story required');
  toast('📤 Publishing…');
  publishToBlog(t,bo,so||'D-Ray Show',{imgB64:state.pendingImg,edit:state.editing}).then(()=>{state.composing=false;state.editing=null;state.pendingImg=null;toast('🚀 LIVE! Link in Blog tab');render()}).catch(er=>toast('⚠️ '+er.message));return}
@@ -561,6 +595,14 @@ if(d.act==='blogcopy'){navigator.clipboard.writeText(state.blog[d.i].url).then((
 if(d.act==='blogshare'){const p=state.blog[d.i];if(navigator.share)navigator.share({title:p.title,url:p.url}).catch(()=>{});else navigator.clipboard.writeText(p.url).then(()=>toast('🔗 Link copied!'));return}
 if(d.act==='blogopen'){window.open(state.blog[d.i].url,'_blank');return}
 if(d.act==='blogedit'){state.editing=state.blog[d.i];state.composing=true;state.pendingImg=null;render();window.scrollTo(0,0);return}
+if(d.act==='brainopen'){if(!isBoss())return;state.editBrain=!state.editBrain;if(state.editBrain)state.brainText=state.masterText||DEFAULT_EDITORIAL;render();return}
+if(d.act==='brainreset'){state.brainText=DEFAULT_EDITORIAL;toast('↺ Default loaded — tap SAVE');render();return}
+if(d.act==='brainsave'){
+ if(!isBoss())return;
+ const t=($('#brainBox')?$('#brainBox').value:'').trim();
+ if(!t||!t.includes('[CORE]')||!t.includes('[IP]'))return toast('⚠️ Keep the [CORE] … [IP] section tags');
+ toast('💾 Saving editorial.txt…');
+ ghUpsert(state.ghRepo.trim()||'server','editorial.txt',b64t(t),'Update editorial brain').then(()=>{state.masterText=t;state.master=buildMaster(parseSections(t));state.editBrain=false;toast('✅ Editorial brain updated for ALL phones');render()}).catch(e=>toast('⚠️ '+e.message));return}
 if(d.act==='savekey'){if(!isBoss())return;state.apiKey=$('#keyInput').value.trim();localStorage.setItem('drs_key',state.apiKey);toast('✅ Key saved — detected: '+(state.apiKey.startsWith('gsk_')?'Groq':'xAI Grok'));return}
 if(d.act==='savegh'){
  if(!isBoss())return;
@@ -586,14 +628,14 @@ if(d.act==='synckeys'){
  toast('☁️ Syncing encoded keys + server functions…');
  (async()=>{try{
   await ghUpsertLocal(state.ghRepo.trim(),'api/keys.js',b64t(keysCode()),'Sync newsroom keys (encoded)');
-  await ghUpsertLocal(state.ghRepo.trim(),'api/ai.js',b64t(AI_JS),'Install AI server function');  await ghUpsertLocal(state.ghRepo.trim(),'api/gh.js',b64t(GH_JS),'Install GitHub server function');
+  await ghUpsertLocal(state.ghRepo.trim(),'api/ai.js',b64t(AI_JS),'Install AI server function');
+  await ghUpsertLocal(state.ghRepo.trim(),'api/gh.js',b64t(GH_JS),'Install GitHub server function');
   toast('✅ Server ready — every staff phone now works with just login');
  }catch(e){toast('⚠️ '+e.message)}})();return}
 if(d.act==='installrelay'){
  if(!isBoss())return toast('⚠️ Admin1 only');
  if(!state.ghToken.trim()||!state.ghRepo.trim())return toast('⚠️ Save GitHub token + repo first');
- toast('🛠 Installing relay…');
- ghUpsertLocal(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Install D-Ray news relay').then(()=>toast('✅ Relay installed — wait ~20s for Vercel, then 🔄')).catch(er=>toast('⚠️ '+er.message));return}
+ toast('🛠 Installing relay…'); ghUpsertLocal(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Install D-Ray news relay').then(()=>toast('✅ Relay installed — wait ~20s for Vercel, then 🔄')).catch(er=>toast('⚠️ '+er.message));return}
 if(d.act==='testfeeds'){testFeeds();return}
 if(d.act==='testkey'){if(!isBoss())return;testKey();return}
 if(d.act==='logout'){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();return}
@@ -606,7 +648,7 @@ if(e.target.id==='cImg'&&e.target.files&&e.target.files[0]){toast('🖼 Preparin
 $('#region').addEventListener('change',e=>{state.region=e.target.value;render()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 let started=false;
-function start(){if(started)return;started=true;render();checkFeeds();loadBlog();setInterval(checkFeeds,180000)}
+function start(){if(started)return;started=true;loadEditorial();render();checkFeeds();loadBlog();setInterval(checkFeeds,180000)}
 if(state.user){$('#login').style.display='none';start()}
 </script>
 </body>
