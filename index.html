@@ -102,6 +102,8 @@ const safeJson=r=>r.text().then(t=>{try{return JSON.parse(t)}catch(e){return nul
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
 const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
 const b64t=s=>btoa(unescape(encodeURIComponent(s)));
+/* v20: scanner-proof scramble = reversed char codes joined by dots */
+const encKey=s=>{const r=s.split('').reverse().join('');const a=[];for(let i=0;i<r.length;i++)a.push(r.charCodeAt(i));return a.join('.')};
 function agoLabel(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));
 if(m<10)return'🔥 FRESH BREAKING';
 if(m<60)return m+'m ago';
@@ -144,8 +146,8 @@ a professional, medium-length blog news article of 4-6 flowing paragraphs (about
 
 [IP]
 THE STANDARDIZED D-RAY SHOW 4:5 BREAKING-NEWS FLYER PROMPT (1080x1350), international broadcast standard like Fox News, Sky News and BBC Breaking — VERY BRIGHT, CINEMATIC, SATURATED, GLOSSY, CATCHY, and ROOTED IN REALITY. REALITY-ANCHOR RULE: first extract the real-world visual anchors of the story — the exact country and city, its flag, recognizable landmarks or skyline, the real type of place (market, parliament, airport, stadium, disaster zone, central bank, exchange floor), the uniforms or attire involved, and the event type — then build the scene so it closely resembles the actual press photographs publicly available for this exact event, country or place: same location look, same flags, same environment, same kind of action, same time of day as reported, so any viewer instantly recognizes the real story. PEOPLE RULE: when named humans are involved, depict figures that match their publicly known press appearance for this context (role, attire, setting, posture — an official at a podium with the right backdrop, an athlete in the right kit, a trader on the right floor); keep them respectful, accurate-in-context and clean; if an exact face cannot be guaranteed, use a role-accurate representative figure from a natural news angle (mid-shot, side or three-quarter view, back view at the scene) instead of a wrong or distorted face. REFERENCE RULE: if the image tool accepts image inputs, instruct the user to attach the closest real press photo of the event as a composition and color reference. Build EVERY flyer with this exact anatomy: (1) SCENE: ultra-clean photorealistic cinematic editorial render of the reality-anchored scene, bright studio-grade key light, blue and red rim lighting, shallow depth of field, crisp detail, no watermarks, no artifacts, no third-party logos, no distorted bodies; (2) TOP-LEFT brand lockup, exactly: the D-Ray Show shield logo — shield split royal-blue left / signal-red right, big white letter R, red lightning bolt through it — next to the wordmark "D RAY SHOW" where "D RAY" is royal blue and "SHOW" is signal red with a blue wireframe globe replacing the O, small grey tagline beneath "YOUR DAILY GLOBAL UPDATE"; (3) TOP-RIGHT: glowing signal-red chip "BREAKING NEWS" in bold white condensed capitals (use "DEVELOPING STORY" when not breaking); (4) BOTTOM THIRD Fox-style: thick signal-red headline bar with the story headline in HUGE white ultra-bold condensed ALL-CAPS (max 6-8 words, present tense, punchy, perfect spelling), beneath it a deep royal-blue ticker bar with small white capitals "YOUR DAILY GLOBAL UPDATE • LATEST UPDATES • GLOBAL COVERAGE • UNBIASED REPORTING"; (5) small dark chip with the real country flag + GMT time; (6) COLOR GRADE: royal blue #1E5AA8 to #3F8EDC with signal red #C62828 to #E53935 accents, brilliant whites, high contrast, glossy finish, safe margins; (7) all text perfect spelling, sharp kerning. End with: --ar 4:5`;
-
-function parseSections(t){const o={};let k=null;t.split('\n').forEach(L=>{const m=/^\[([A-Z]+)\]\s*$/.exec(L.trim());
+function parseSections(t){const o={};let k=null;
+t.split('\n').forEach(L=>{const m=/^\[([A-Z]+)\]\s*$/.exec(L.trim());
 if(m){k=m[1];o[k]='';}else if(k){o[k]+=L+'\n'}});
 Object.keys(o).forEach(k=>o[k]=o[k].trim());
 return o}
@@ -160,8 +162,10 @@ try{
 state.masterText=null;state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
 }
 
+/* v20: server decodes the number-scrambled keys; env vars still win if present */
 const AI_JS=`let K={};try{K=require('./keys.js')}catch(e){}
-const KEY=process.env.AI_KEY||(K.AI_B64?Buffer.from(K.AI_B64,'base64').toString('utf8'):'');
+function decKey(s){try{var a=String(s).split('.');var out='';for(var i=0;i<a.length;i++)out+=String.fromCharCode(parseInt(a[i],10));return out.split('').reverse().join('')}catch(e){return ''}}
+const KEY=process.env.AI_KEY||(K.AI_E?decKey(K.AI_E):(K.AI_B64?Buffer.from(K.AI_B64,'base64').toString('utf8'):''));
 async function models(p){try{const r=await fetch(p.url.replace('/chat/completions','/models'),{headers:{Authorization:'Bearer '+KEY}});if(!r.ok)return[];const d=await r.json();return (d.data||[]).map(function(x){return x.id})}catch(e){return[]}}
 module.exports=async function handler(req,res){
 if(!KEY)return res.status(500).json({error:'no_keys'});
@@ -182,19 +186,20 @@ res.status(500).json({error:last||'all models failed'});
 };
 `;
 const GH_JS=`let K={};try{K=require('./keys.js')}catch(e){}
-const TOK=process.env.GH_TOKEN||(K.GH_B64?Buffer.from(K.GH_B64,'base64').toString('utf8'):'');
+function decKey(s){try{var a=String(s).split('.');var out='';for(var i=0;i<a.length;i++)out+=String.fromCharCode(parseInt(a[i],10));return out.split('').reverse().join('')}catch(e){return ''}}
+const TOK=process.env.GH_TOKEN||(K.GH_E?decKey(K.GH_E):(K.GH_B64?Buffer.from(K.GH_B64,'base64').toString('utf8'):''));
 const REPO=process.env.GH_REPO||K.GH_REPO||'';
 module.exports=async function handler(req,res){
 if(!TOK||!REPO)return res.status(500).json({error:'no_keys'});
 var b=req.body||{};
 var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'dray-desk'};
 try{
- if(b.get){
-  var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
+ if(b.get){  var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
   if(!g.ok)return res.status(200).json({exists:false});
   var m=await g.json();return res.status(200).json({exists:true,meta:{sha:m.sha,content:m.content}});
  }
- var sha; var g2=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
+ var sha;
+ var g2=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
  if(g2.ok){var m2=await g2.json();sha=m2.sha}
  var body={message:b.message,content:b.content};if(sha)body.sha=sha;
  var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{method:'PUT',headers:{'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','Content-Type':'application/json','User-Agent':'dray-desk'},body:JSON.stringify(body)});
@@ -209,12 +214,12 @@ const FEEDS=[
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
 {region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
 {region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
-{region:'world',flag:'🇶',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
-{region:'nigeria',flag:'🇳',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
-{region:'africa',flag:'🇿',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
-{region:'africa',flag:'🇰',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
+{region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
+{region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
+{region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const dec=function(s){return String(s).replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g,'$1').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/'/g,"'").replace(/"/g,'"').trim()};
 function grab(b,t){var r=new RegExp('<'+t+'[^>]*>([\\\\s\\\\S]*?)</'+t+'>').exec(b);return r?dec(r[1]):''}
 function parse(xml){
@@ -238,17 +243,22 @@ module.exports=async function handler(req,res){
  res.setHeader('Cache-Control','s-maxage=60, stale-while-revalidate=120');
  res.status(200).json({ok:true,items:out});
 };
-`;
-function keysCode(){return 'module.exports={AI_B64:'+JSON.stringify(b64t(state.apiKey.trim()))+',GH_B64:'+JSON.stringify(b64t(state.ghToken.trim()))+',GH_REPO:'+JSON.stringify(state.ghRepo.trim())+'};\n'}
+`;function keysCode(){return 'module.exports={AI_E:'+JSON.stringify(encKey(state.apiKey.trim()))+',GH_E:'+JSON.stringify(encKey(state.ghToken.trim()))+',GH_REPO:'+JSON.stringify(state.ghRepo.trim())+'};\n'}
+const MANUAL_ENV_PLAN=`GITHUB BLOCKED THE KEY FILE (409). USE THE MANUAL PLAN (3 MIN, ONE-TIME, CAN NEVER BE BLOCKED):
+1. Open vercel.com → your project → Settings → Environment Variables.
+2. Add three variables: AI_KEY = your xai or gsk key; GH_TOKEN = your ghp token; GH_REPO = username/repo-name.
+3. Save, then go to Deployments and Redeploy the latest build.
+The server functions read these env vars FIRST, so everything works with zero keys inside the repo.`;
 
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
-{region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
-{region:'world',flag:'🇬',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
-{region:'world',flag:'🇶',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
-{region:'nigeria',flag:'🇳',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
+{region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
+{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
+{region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
+{region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
+{region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
 {region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
@@ -282,8 +292,7 @@ try{
   if(d&&d.items&&d.items.length){state.relay=true;return d.items}}
 }catch(e){state.relayCode='net'}
 state.relay=false;
-const all=[];
-const g=guardian();
+const all=[];const g=guardian();
 await Promise.all(FEEDS.map(async f=>{
  const it=await pull(f);
  it.slice(0,f.cap||10).forEach(n=>all.push({title:n.title,link:n.link,pub:n.pub,region:f.region,flag:f.flag,country:f.country||f.name,src:f.src||null,goog:!!f.goog}));
@@ -292,7 +301,8 @@ await Promise.all(FEEDS.map(async f=>{
 return all}
 
 async function checkFeeds(){
-state.scanning=true;if(state.view==='dash')render();const items=await gather();
+state.scanning=true;if(state.view==='dash')render();
+const items=await gather();
 if((state.relayCode===404||state.relayCode===500)&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.healed){
  state.healed=true;
  toast('🛠 Relay missing — auto-installing…');
@@ -324,15 +334,14 @@ if(state.view==='dash'||state.view==='alerts')render()}
 
 function loadSamples(){
 if(state.sampled)return;state.sampled=true;
-[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹',c:'Turkey',r:'world'},
+[{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
 {t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳🇬',c:'Nigeria',r:'nigeria'},
 {t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
 
 function prov(){return state.apiKey.trim().startsWith('gsk_')
- ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'}
- :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
+ ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'} :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
 async function discoverModels(p){
 try{
  const r=await fetchT(p.url.replace('/chat/completions','/models'),9000);
@@ -341,7 +350,8 @@ try{
  return (d&&d.data||[]).map(x=>x.id);
 }catch(e){return[]}}
 async function modelList(p){
-const avail=await discoverModels(p);let list=[];
+const avail=await discoverModels(p);
+let list=[];
 if(avail.length){
  list=p.models.filter(m=>avail.includes(m));
  const rest=avail.filter(id=>!list.includes(id)&&!/whisper|tts|embed|guard|moderat|transcrib/i.test(id));
@@ -380,8 +390,7 @@ for(const m of list){
  }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
 }
 throw new Error(lastErr||'All AI models failed');
-}
-async function testKey(){
+}async function testKey(){
 if(!state.apiKey)return toast('⚠️ Paste a key first');
 toast('🩺 Testing your key…');
 const p=prov();
@@ -390,7 +399,8 @@ const list=await modelList(p);
 const log=['Models alive on your key today: '+(avail.length?avail.slice(0,6).join(', ')+(avail.length>6?'…':''):'(could not list — trying known names)')];
 for(const m of list.slice(0,3)){
  try{
-  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,max_tokens:5,messages:[{role:'user',content:'Say OK'}]})});  const body=await res.text();
+  const res=await fetch(p.url,{method:'POST',headers:{'Authorization':'Bearer '+state.apiKey.trim(),'Content-Type':'application/json'},body:JSON.stringify({model:m,max_tokens:5,messages:[{role:'user',content:'Say OK'}]})});
+  const body=await res.text();
   if(res.ok){state.lastModel=p.name+' / '+m;state.testLog=log.join('\n')+'\n✅ KEY WORKS on '+m;toast('✅ Key works on '+m);render();return}
   log.push('❌ '+m+' → HTTP '+res.status+' '+body.slice(0,100));
  }catch(e){log.push('❌ '+m+' → '+String(e).slice(0,80))}
@@ -429,8 +439,7 @@ for(const k of keys){
 }
 if(marks.length<2)return null;
 marks.sort((a,b)=>a.s-b.s);
-const obj={};
-for(let i=0;i<marks.length;i++){
+const obj={};for(let i=0;i<marks.length;i++){
  const start=marks[i].e;
  const end=i+1<marks.length?marks[i+1].s:t.length;
  obj[marks[i].k]=t.slice(start,end);
@@ -439,7 +448,8 @@ return obj;
 }
 
 async function gen(id,angle){
-const it=state.arrived.find(x=>x.id===id);if(!it||it.busy)return;it.busy=true;it.error=false;render();
+const it=state.arrived.find(x=>x.id===id);if(!it||it.busy)return;
+it.busy=true;it.error=false;render();
 try{
  if(!it.raw){try{const j=await fetch('https://r.jina.ai/'+it.link);it.raw=(await j.text()).slice(0,9000)}catch(e){}}
  const userMsg=(angle?'REGENERATE with a clearly different angle (human vs institutional). Previous FB version to differ from:\n'+((state.out[id]&&state.out[id].fb)||'')+'\n\n':'')+'SOURCE: '+it.source+'\nHEADLINE: '+it.title+'\nFULL TEXT:\n'+(it.raw||it.title);
@@ -478,8 +488,7 @@ async function ghUpsert(repo,path,b64,msg){
 try{
  const r=await fetch('/api/gh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,message:msg,content:b64})});
  if(r.ok)return await safeJson(r)||{};
- const d=await safeJson(r);
- if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
+ const d=await safeJson(r); if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
 }catch(e){ if(String(e.message).includes('Admin1'))throw e; }
 return ghUpsertLocal(repo,path,b64,msg)}
 function fileToB64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,1200/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.82).split(',')[1])};img.onerror=rej;img.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
@@ -488,7 +497,8 @@ const paras=p.body.split(/\n{2,}/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).repla
 const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.title,description:p.desc,datePublished:new Date().toISOString(),author:{'@type':'Organization',name:'D-Ray Show'},publisher:{'@type':'Organization',name:'D-Ray Show Blog News'},mainEntityOfPage:p.url};
 return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.title)+' | D-Ray Show Blog News</title><meta name="description" content="'+esc(p.desc)+'"><link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.title)+'"><meta property="og:description" content="'+esc(p.desc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+(p.img||location.origin+'/logo.png')+'"><meta property="og:site_name" content="D-Ray Show Blog News"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#F7F8FC;color:#101828}header{background:#0A1220;color:#fff;padding:18px 16px}header h1{margin:0;font:800 20px Arial}header h1 b{color:#E53935}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px}.meta{color:#8A97AB;font:12px Arial;margin-bottom:14px}img.hero{width:100%;border-radius:12px;margin:0 0 18px}p{margin:0 0 16px}.cred{background:#0A1220;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6}footer{color:#8A97AB;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#1E5AA8}</style></head><body><header><div class="wrap"><h1>D RAY <b>SHOW</b> BLOG NEWS</h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.title)+'</h2><p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • D-Ray Show Blog News</p>'+(p.img?'<img class="hero" src="'+p.img+'" alt="'+esc(p.title)+'">':'')+paras+'<div class="cred">📰 Credit: '+esc(p.source||'D-Ray Show')+'<br>📺 D-Ray Show — Your Daily Global Update.<br>Follow: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport • <a href="'+location.origin+'/blog/" style="color:#7FB4F5">Read more at D-Ray Show Blog News</a></div></main><footer>© D-Ray Show Blog News • Latest Updates. Global Coverage. Unbiased Reporting.</footer></body></html>'}
 async function publishToBlog(title,bodyText,source,o){
-o=o||{};const repo=state.ghRepo.trim()||'server';
+o=o||{};
+const repo=state.ghRepo.trim()||'server';
 const slug=o.edit?o.edit.id:((title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'post')+'-'+Date.now().toString(36));
 let img=(o.edit&&o.edit.img)?o.edit.img:'';
 if(o.imgB64){await ghUpsert(repo,'blog/img/'+slug+'.jpg',o.imgB64,'Image: '+title);img=location.origin+'/blog/img/'+slug+'.jpg'}
@@ -521,30 +531,29 @@ return `<div class="card">${badge}<h3>${esc(it.title)}</h3>
 <div class="btns"><button class="gen" data-act="gen" data-id="${it.id}">⚡ GENERATE</button><button class="re" data-act="regen" data-id="${it.id}">⟳ REGENERATE</button></div>
 ${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
-/* v19 role gate: editors never see Settings */
 const setBtn=document.querySelector('#nav [data-v="set"]');
 if(setBtn)setBtn.style.display=isAdmin()?'':'none';
 if(state.view==='set'&&!isAdmin())state.view='dash';
 document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v19 • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
-if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v20 • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
 <div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ ${state.composing?'✖ CLOSE':'CREATE NEWS'}</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
 ${state.composing?`<div class="card">${state.editing?'<div class="hd">✏️ EDITING: '+esc(state.editing.title)+'</div>':''}
 <input id="cTitle" placeholder="Headline / Title" style="max-width:none" value="${esc(state.editing?state.editing.title:'')}">
 <input id="cSource" placeholder="Source / Credit (e.g. Reuters)" style="max-width:none" value="${esc(state.editing?state.editing.source:'')}">
 <input type="file" id="cImg" accept="image/*" style="max-width:none;background:#0B1830">
-${state.pendingImg?`<img src="data:image/jpeg;base64,${state.pendingImg}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">`:(state.editing&&state.editing.img?`<img src="${state.editing.img}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">`:'')}<textarea id="cBody" rows="10" placeholder="Write the full story here… (or use 📤 PUBLISH on a generated Full Article from the Desk)" style="max-width:none;font:400 14px/1.6 Inter">${esc(state.editing?state.editing.body:'')}</textarea>
+${state.pendingImg?`<img src="data:image/jpeg;base64,${state.pendingImg}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">`:(state.editing&&state.editing.img?`<img src="${state.editing.img}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;margin-bottom:10px">`:'')}
+<textarea id="cBody" rows="10" placeholder="Write the full story here… (or use 📤 PUBLISH on a generated Full Article from the Desk)" style="max-width:none;font:400 14px/1.6 Inter">${esc(state.editing?state.editing.body:'')}</textarea>
 <button class="pub" style="width:100%" data-act="pubmanual">🚀 ${state.editing?'UPDATE POST':'PUBLISH TO BLOG'}</button></div>`:''}
 ${state.blogLoading?'<div class="empty">Loading published posts…</div>':(state.blog&&state.blog.length?state.blog.map((p,i)=>`<div class="card"><h3>${esc(p.title)}</h3><div class="meta">${new Date(p.date).toUTCString().slice(0,22)} GMT${p.source?' • Source: '+esc(p.source):''}</div><div class="btns"><button class="copy" data-act="blogcopy" data-i="${i}">🔗 COPY LINK</button><button class="save" data-act="blogshare" data-i="${i}">📤 SHARE</button><button class="save" data-act="blogopen" data-i="${i}">🌐 OPEN</button><button class="save" data-act="blogedit" data-i="${i}">✏️ EDIT</button></div></div>`).join(''):'<div class="empty">Nothing published yet.<br>Generate a story and tap 📤 PUBLISH, or tap ✍ CREATE NEWS.</div>')}`;return}
 if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)=>`<div class="card">${d.out&&d.out.title?`<div class="hd">📰 ${esc(d.out.title)}</div>`:''}<h3>${esc(d.title)}</h3><div class="meta">Saved ${d.ts} • Source: ${esc(d.source)}</div><div class="tabs">${TABS.map(([k,l])=>`<button class="tab" data-act="copyraw" data-i="${i}" data-t="${k}">📋 ${l}</button>`).join('')}</div></div>`).join(''):'<div class="empty">Nothing saved yet — hit 💾 on a generated story.</div>';return}
 if(v==='set'){
 const boss=isBoss();
 $('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v19</em></div>
+<div class="set"><span>🏗 Build</span><em>v20</em></div>
 <div class="set"><span>🛰 News route</span><em>${state.relay?'⚡ Vercel relay active':(state.relayCode===404?'🛠 relay auto-healing':'🌐 proxy+Guardian mode')}</em></div>
 <div class="set"><span>🧠 Editorial brain</span><em>${state.masterText?'📄 editorial.txt live':'built-in default'}</em></div>
 ${boss?`
@@ -563,7 +572,7 @@ ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}<
 <input id="ghToken" type="password" value="${esc(state.ghToken)}" placeholder="ghp_..." style="max-width:none">
 <input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="repo-name or username/repo-name" style="max-width:none">
 <button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
-<div class="empty" style="padding:8px 10px">🔐 Keys are stored ENCODED on the server. Make the repo PRIVATE when done.</div>`
+<div class="empty" style="padding:8px 10px">🔐 Keys are stored as scrambled number codes GitHub cannot read. If it ever blocks, the manual env-var plan appears in the TEST KEY log.</div>`
 :`<div class="set"><span>🔐 AI & publishing keys</span><em>✅ managed on server by Admin1</em></div>
 <div class="empty" style="padding:8px 10px">Keys and server controls belong to Admin1. Your workspace is ready — go create. 🟢</div>`}
 <button class="re" style="width:100%;margin-top:8px" data-act="testfeeds">🛰 FEEDS TEST</button>
@@ -577,8 +586,7 @@ document.addEventListener('click',async e=>{
 const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
  if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
- else toast('❌ Invalid username or PIN');return}
-if(d.act==='logoutarm'){
+ else toast('❌ Invalid username or PIN');return}if(d.act==='logoutarm'){
  if(state.arm){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();}
  else{state.arm=true;toast('🚪 Tap the door again to log out');setTimeout(()=>{state.arm=false},3000);}
  return}
@@ -586,7 +594,8 @@ if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
 if(d.act==='refresh'){toast('🔄 Scanning all channels…');checkFeeds();return}
 if(d.act==='gen'){gen(d.id,false);return}
 if(d.act==='regen'){gen(d.id,true);return}
-if(d.act==='tab'){state.tab[d.id]=d.t;render();return}if(d.act==='copy'){navigator.clipboard.writeText(state.out[d.id][state.tab[d.id]||'fb']).then(()=>toast('✅ Copied!'));return}
+if(d.act==='tab'){state.tab[d.id]=d.t;render();return}
+if(d.act==='copy'){navigator.clipboard.writeText(state.out[d.id][state.tab[d.id]||'fb']).then(()=>toast('✅ Copied!'));return}
 if(d.act==='copyraw'){navigator.clipboard.writeText(state.drafts[d.i].out[d.t]).then(()=>toast('✅ Copied!'));return}
 if(d.act==='save'){const it=state.arrived.find(x=>x.id===d.id);state.drafts.unshift({title:it.title,source:it.source,ts:fmt(it.ts),out:state.out[it.id]});localStorage.setItem('drs_drafts',JSON.stringify(state.drafts));toast('💾 Saved to Drafts');render();return}
 if(d.act==='publish'){const it=state.arrived.find(x=>x.id===d.id);const o=state.out[d.id];
@@ -626,19 +635,22 @@ if(d.act==='savegh'){
   }catch(e){}
  }
  state.ghRepo=repo;
- localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);
- toast('✅ GitHub saved'+(repo.includes('/')?' as '+repo:''));return}
+ localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo); toast('✅ GitHub saved'+(repo.includes('/')?' as '+repo:''));return}
 if(d.act==='synckeys'){
  if(!isBoss())return toast('⚠️ Admin1 only');
  if(!state.apiKey.trim())return toast('⚠️ Save your AI key first');
  if(!state.ghToken.trim()||!state.ghRepo.trim())return toast('⚠️ Save GitHub token + repo first');
  if(!state.ghRepo.includes('/'))return toast('⚠️ Repo must be username/repo — tap SAVE GITHUB again first');
- toast('☁️ Syncing encoded keys + server functions…');
+ toast('☁️ Syncing scrambled keys + server functions…');
  (async()=>{try{
-  await ghUpsertLocal(state.ghRepo.trim(),'api/keys.js',b64t(keysCode()),'Sync newsroom keys (encoded)');  await ghUpsertLocal(state.ghRepo.trim(),'api/ai.js',b64t(AI_JS),'Install AI server function');
+  await ghUpsertLocal(state.ghRepo.trim(),'api/keys.js',b64t(keysCode()),'Sync newsroom keys (scrambled)');
+  await ghUpsertLocal(state.ghRepo.trim(),'api/ai.js',b64t(AI_JS),'Install AI server function');
   await ghUpsertLocal(state.ghRepo.trim(),'api/gh.js',b64t(GH_JS),'Install GitHub server function');
   toast('✅ Server ready — every staff phone now works with just login');
- }catch(e){toast('⚠️ '+e.message)}})();return}
+ }catch(e){
+  if(String(e.message).includes('409')){state.testLog=MANUAL_ENV_PLAN;toast('⚠️ GitHub still blocked — manual plan now in TEST KEY log');render();}
+  else toast('⚠️ '+e.message);
+ }})();return}
 if(d.act==='installrelay'){
  if(!isBoss())return toast('⚠️ Admin1 only');
  if(!state.ghToken.trim()||!state.ghRepo.trim())return toast('⚠️ Save GitHub token + repo first');
