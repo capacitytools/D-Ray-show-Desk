@@ -5,9 +5,10 @@ const REPO=process.env.GH_REPO||K.GH_REPO||'';
 module.exports=async function handler(req,res){
 if(!TOK||!REPO)return res.status(500).json({error:'no_keys'});
 var b=req.body||{};
-var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'dray-desk'};
-try{
- if(b.get){  var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
+if(typeof b==='string'){try{b=JSON.parse(b)}catch(e){b={}}}
+var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'dray-desk'};try{
+ if(b.get){
+  var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
   if(!g.ok)return res.status(200).json({exists:false});
   var m=await g.json();return res.status(200).json({exists:true,meta:{sha:m.sha,content:m.content}});
  }
