@@ -102,7 +102,6 @@ const safeJson=r=>r.text().then(t=>{try{return JSON.parse(t)}catch(e){return nul
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
 const fmt=ts=>new Date(ts).toUTCString().slice(17,22);
 const b64t=s=>btoa(unescape(encodeURIComponent(s)));
-/* v20: scanner-proof scramble = reversed char codes joined by dots */
 const encKey=s=>{const r=s.split('').reverse().join('');const a=[];for(let i=0;i<r.length;i++)a.push(r.charCodeAt(i));return a.join('.')};
 function agoLabel(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));
 if(m<10)return'🔥 FRESH BREAKING';
@@ -162,7 +161,7 @@ try{
 state.masterText=null;state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
 }
 
-/* v20: server decodes the number-scrambled keys; env vars still win if present */
+/* v21: server rejects empty input; tolerates string bodies */
 const AI_JS=`let K={};try{K=require('./keys.js')}catch(e){}
 function decKey(s){try{var a=String(s).split('.');var out='';for(var i=0;i<a.length;i++)out+=String.fromCharCode(parseInt(a[i],10));return out.split('').reverse().join('')}catch(e){return ''}}
 const KEY=process.env.AI_KEY||(K.AI_E?decKey(K.AI_E):(K.AI_B64?Buffer.from(K.AI_B64,'base64').toString('utf8'):''));
@@ -170,6 +169,8 @@ async function models(p){try{const r=await fetch(p.url.replace('/chat/completion
 module.exports=async function handler(req,res){
 if(!KEY)return res.status(500).json({error:'no_keys'});
 var b=req.body||{};
+if(typeof b==='string'){try{b=JSON.parse(b)}catch(e){b={}}}
+if(req.method!=='POST'||!b.user)return res.status(400).json({error:'empty_user'});
 var p=KEY.indexOf('gsk_')===0?{url:'https://api.groq.com/openai/v1/chat/completions',pref:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant']}:{url:'https://api.x.ai/v1/chat/completions',pref:['grok-3-mini','grok-3','grok-4','grok-2-latest']};
 var avail=await models(p);
 var list=p.pref.filter(function(m){return avail.indexOf(m)>-1}).concat(avail.filter(function(id){return p.pref.indexOf(id)<0&&!/whisper|tts|embed|guard|moderat|transcrib/i.test(id)}));
@@ -177,7 +178,7 @@ if(!list.length)list=p.pref;
 var last='';
 for(var i=0;i<list.length;i++){
  try{
-  var r=await fetch(p.url,{method:'POST',headers:{Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({model:list[i],temperature:0.5,messages:[{role:'system',content:b.system||''},{role:'user',content:b.user||''}]})});
+  var r=await fetch(p.url,{method:'POST',headers:{Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({model:list[i],temperature:0.5,messages:[{role:'system',content:b.system||''},{role:'user',content:b.user}]})});
   if(r.ok){var d=await r.json();return res.status(200).json({text:d.choices[0].message.content,model:list[i]})}
   last='HTTP '+r.status;
  }catch(e){last=String(e).slice(0,80)}
@@ -192,9 +193,10 @@ const REPO=process.env.GH_REPO||K.GH_REPO||'';
 module.exports=async function handler(req,res){
 if(!TOK||!REPO)return res.status(500).json({error:'no_keys'});
 var b=req.body||{};
-var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'dray-desk'};
-try{
- if(b.get){  var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
+if(typeof b==='string'){try{b=JSON.parse(b)}catch(e){b={}}}
+var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'dray-desk'};try{
+ if(b.get){
+  var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
   if(!g.ok)return res.status(200).json({exists:false});
   var m=await g.json();return res.status(200).json({exists:true,meta:{sha:m.sha,content:m.content}});
  }
@@ -216,8 +218,8 @@ const FEEDS=[
 {region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
 {region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const dec=function(s){return String(s).replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g,'$1').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/'/g,"'").replace(/"/g,'"').trim()};
@@ -241,9 +243,9 @@ module.exports=async function handler(req,res){
   }catch(e){}
  }));
  res.setHeader('Cache-Control','s-maxage=60, stale-while-revalidate=120');
- res.status(200).json({ok:true,items:out});
-};
-`;function keysCode(){return 'module.exports={AI_E:'+JSON.stringify(encKey(state.apiKey.trim()))+',GH_E:'+JSON.stringify(encKey(state.ghToken.trim()))+',GH_REPO:'+JSON.stringify(state.ghRepo.trim())+'};\n'}
+ res.status(200).json({ok:true,items:out});};
+`;
+function keysCode(){return 'module.exports={AI_E:'+JSON.stringify(encKey(state.apiKey.trim()))+',GH_E:'+JSON.stringify(encKey(state.ghToken.trim()))+',GH_REPO:'+JSON.stringify(state.ghRepo.trim())+'};\n'}
 const MANUAL_ENV_PLAN=`GITHUB BLOCKED THE KEY FILE (409). USE THE MANUAL PLAN (3 MIN, ONE-TIME, CAN NEVER BE BLOCKED):
 1. Open vercel.com → your project → Settings → Environment Variables.
 2. Add three variables: AI_KEY = your xai or gsk key; GH_TOKEN = your ghp token; GH_REPO = username/repo-name.
@@ -257,14 +259,15 @@ const FEEDS=[
 {region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
 {region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
+{region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
 
 function parseXML(t){const xml=new DOMParser().parseFromString(t,'text/xml');return[...xml.querySelectorAll('item')].map(n=>({title:(n.querySelector('title')||{}).textContent||'',link:(n.querySelector('link')||{}).textContent||'',pub:(n.querySelector('pubDate')||{}).textContent||''}))}
-function fetchT(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,{signal:c.signal}).finally(()=>clearTimeout(t))}
+/* v21: fetchT now accepts request options */
+function fetchT(url,ms,opts){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,Object.assign({signal:c.signal},opts||{})).finally(()=>clearTimeout(t))}
 async function pull(f){
 const attempts=[
  (async()=>{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent(f.url),9000);if(!r.ok)throw 0;return parseXML(await r.text())})(),
@@ -289,10 +292,10 @@ try{
  const r=await fetchT('/api/feeds',15000);
  state.relayCode=r.status;
  if(r.ok){const d=await safeJson(r);
-  if(d&&d.items&&d.items.length){state.relay=true;return d.items}}
-}catch(e){state.relayCode='net'}
+  if(d&&d.items&&d.items.length){state.relay=true;return d.items}}}catch(e){state.relayCode='net'}
 state.relay=false;
-const all=[];const g=guardian();
+const all=[];
+const g=guardian();
 await Promise.all(FEEDS.map(async f=>{
  const it=await pull(f);
  it.slice(0,f.cap||10).forEach(n=>all.push({title:n.title,link:n.link,pub:n.pub,region:f.region,flag:f.flag,country:f.country||f.name,src:f.src||null,goog:!!f.goog}));
@@ -335,13 +338,13 @@ if(state.view==='dash'||state.view==='alerts')render()}
 function loadSamples(){
 if(state.sampled)return;state.sampled=true;
 [{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
-{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳🇬',c:'Nigeria',r:'nigeria'},
+{t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳',c:'Nigeria',r:'nigeria'},
 {t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
-
 function prov(){return state.apiKey.trim().startsWith('gsk_')
- ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'} :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
+ ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'}
+ :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
 async function discoverModels(p){
 try{
  const r=await fetchT(p.url.replace('/chat/completions','/models'),9000);
@@ -362,8 +365,9 @@ return list}
 async function aiCall(userMsg){
 if(!state.master)state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
 try{
- const r=await fetchT('/api/ai',60000);
- if(r.ok){const d=await safeJson(r);if(d&&d.text){state.lastModel='Server / '+d.model;return{text:d.text,model:d.model,prov:'Server'}}}
+ /* v21: proper POST with the full brain + story attached */
+ const r=await fetchT('/api/ai',60000,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:state.master,user:userMsg})});
+ if(r.ok){const d=await safeJson(r);if(d&&d.text&&d.text.length>40){state.lastModel='Server / '+d.model;return{text:d.text,model:d.model,prov:'Server'}}}
  if(r.status===404&&isBoss()&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.synced){
   state.synced=true;toast('☁️ Server AI missing — installing…');
   try{
@@ -386,11 +390,11 @@ for(const m of list){
   if(res.ok){let d=null;try{d=JSON.parse(body)}catch(e){}
    if(d&&d.choices){state.lastModel=p.name+' / '+m;return{text:d.choices[0].message.content,model:m,prov:p.name}}}
   lastErr=p.name+' '+m+' → HTTP '+res.status+': '+body.slice(0,140);
-  if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.');
- }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
+  if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.'); }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
 }
 throw new Error(lastErr||'All AI models failed');
-}async function testKey(){
+}
+async function testKey(){
 if(!state.apiKey)return toast('⚠️ Paste a key first');
 toast('🩺 Testing your key…');
 const p=prov();
@@ -435,11 +439,11 @@ const marks=[];
 for(const k of keys){
  const re=new RegExp('["\'\\*\\s\\n{,]*'+k+'["\'\\*]*\\s*:','i');
  const m=re.exec(t);
- if(m)marks.push({k,s:m.index,e:m.index+m[0].length});
-}
+ if(m)marks.push({k,s:m.index,e:m.index+m[0].length});}
 if(marks.length<2)return null;
 marks.sort((a,b)=>a.s-b.s);
-const obj={};for(let i=0;i<marks.length;i++){
+const obj={};
+for(let i=0;i<marks.length;i++){
  const start=marks[i].e;
  const end=i+1<marks.length?marks[i+1].s:t.length;
  obj[marks[i].k]=t.slice(start,end);
@@ -484,11 +488,11 @@ if(meta&&meta.sha)body.sha=meta.sha;
 const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{...ghAuth(),'Content-Type':'application/json'},body:JSON.stringify(body)});
 if(!r.ok){const t=await r.text();throw new Error('GitHub '+r.status+' '+t.slice(0,90))}
 return await safeJson(r)||{}}
-async function ghUpsert(repo,path,b64,msg){
-try{
+async function ghUpsert(repo,path,b64,msg){try{
  const r=await fetch('/api/gh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,message:msg,content:b64})});
  if(r.ok)return await safeJson(r)||{};
- const d=await safeJson(r); if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
+ const d=await safeJson(r);
+ if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
 }catch(e){ if(String(e.message).includes('Admin1'))throw e; }
 return ghUpsertLocal(repo,path,b64,msg)}
 function fileToB64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,1200/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.82).split(',')[1])};img.onerror=rej;img.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
@@ -533,11 +537,11 @@ ${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
 const setBtn=document.querySelector('#nav [data-v="set"]');
 if(setBtn)setBtn.style.display=isAdmin()?'':'none';
-if(state.view==='set'&&!isAdmin())state.view='dash';
-document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
+if(state.view==='set'&&!isAdmin())state.view='dash';document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
 if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v20 • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
+$('#view').innerHTML=`<div class="scanline">🛰 Build v21 • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
 if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
 if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
 <div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ ${state.composing?'✖ CLOSE':'CREATE NEWS'}</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
@@ -553,7 +557,7 @@ if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)
 if(v==='set'){
 const boss=isBoss();
 $('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v20</em></div>
+<div class="set"><span>🏗 Build</span><em>v21</em></div>
 <div class="set"><span>🛰 News route</span><em>${state.relay?'⚡ Vercel relay active':(state.relayCode===404?'🛠 relay auto-healing':'🌐 proxy+Guardian mode')}</em></div>
 <div class="set"><span>🧠 Editorial brain</span><em>${state.masterText?'📄 editorial.txt live':'built-in default'}</em></div>
 ${boss?`
@@ -572,7 +576,7 @@ ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}<
 <input id="ghToken" type="password" value="${esc(state.ghToken)}" placeholder="ghp_..." style="max-width:none">
 <input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="repo-name or username/repo-name" style="max-width:none">
 <button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
-<div class="empty" style="padding:8px 10px">🔐 Keys are stored as scrambled number codes GitHub cannot read. If it ever blocks, the manual env-var plan appears in the TEST KEY log.</div>`
+<div class="empty" style="padding:8px 10px">🔐 Keys are stored as scrambled number codes GitHub cannot read.</div>`
 :`<div class="set"><span>🔐 AI & publishing keys</span><em>✅ managed on server by Admin1</em></div>
 <div class="empty" style="padding:8px 10px">Keys and server controls belong to Admin1. Your workspace is ready — go create. 🟢</div>`}
 <button class="re" style="width:100%;margin-top:8px" data-act="testfeeds">🛰 FEEDS TEST</button>
@@ -582,11 +586,11 @@ ${state.feedLog?`<div class="out" style="margin-top:10px">${esc(state.feedLog)}<
 <div class="set"><span>🤖 Last AI model</span><em>${esc(state.lastModel||'—')}</em></div>
 <div class="empty">Staff: 3 Admins • 2 Editors • Host: Vercel</div>`}}
 
-document.addEventListener('click',async e=>{
-const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
  if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
- else toast('❌ Invalid username or PIN');return}if(d.act==='logoutarm'){
+ else toast('❌ Invalid username or PIN');return}
+if(d.act==='logoutarm'){
  if(state.arm){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();}
  else{state.arm=true;toast('🚪 Tap the door again to log out');setTimeout(()=>{state.arm=false},3000);}
  return}
@@ -631,11 +635,11 @@ if(d.act==='savegh'){
    const r=await fetch('https://api.github.com/user',{headers:{Authorization:'token '+state.ghToken,Accept:'application/vnd.github+json'}});
    const u=await safeJson(r);
    if(u&&u.login)repo=u.login+'/'+repo;
-   else toast('⚠️ Could not verify token — check it has repo scope');
-  }catch(e){}
+   else toast('⚠️ Could not verify token — check it has repo scope');  }catch(e){}
  }
  state.ghRepo=repo;
- localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo); toast('✅ GitHub saved'+(repo.includes('/')?' as '+repo:''));return}
+ localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);
+ toast('✅ GitHub saved'+(repo.includes('/')?' as '+repo:''));return}
 if(d.act==='synckeys'){
  if(!isBoss())return toast('⚠️ Admin1 only');
  if(!state.apiKey.trim())return toast('⚠️ Save your AI key first');
