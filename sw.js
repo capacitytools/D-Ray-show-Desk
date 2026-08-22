@@ -1,4 +1,4 @@
-const CACHE='dray-v4';
+const CACHE='ct-v1';
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.map(k=>k!==CACHE&&caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
