@@ -3,54 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0A1220">
+<meta name="theme-color" content="#071120">
 <link rel="manifest" href="manifest.json">
-<title>D-Ray Show — Breaking News Desk</title>
+<title>Celebrity Telegraph — Breaking News Desk</title>
 <style>
-:root{--blue:#1E5AA8;--blue2:#3F8EDC;--red:#D32F2F;--red2:#E53935;--bg:#0A1220;--card:#101E36;--line:#1D2E4D;--green:#22C55E;--txt:#F4F7FB;--mut:#9FB0C7}
+:root{--gold:#E8A020;--gold2:#FFB81C;--red:#E5484D;--bg:#071120;--card:#0E1B2E;--line:#1D2E4D;--green:#22C55E;--txt:#F4F7FB;--mut:#9FB0C7}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font:15px/1.55 Inter,system-ui,sans-serif;padding-bottom:84px}
 #login{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-#login h1{font:800 26px Montserrat,Inter;letter-spacing:.5px}#login h1 b{color:var(--red2)}
+#login h1{font:800 24px Montserrat,Inter;letter-spacing:.5px}#login h1 b{color:var(--gold2)}
 #login p{color:var(--mut);font:600 10px Inter;letter-spacing:2px;margin:4px 0 22px}
 input,textarea{background:#122442;color:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;width:100%;max-width:300px;margin-bottom:10px;font:600 15px Inter}
-header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0D1930ee;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0A1626ee;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
 .brand{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
-.brand h1{font:800 16px Montserrat,Inter;letter-spacing:.4px}.brand h1 b{color:var(--red2)}
+.brand h1{font:800 15px Montserrat,Inter;letter-spacing:.4px}.brand h1 b{color:var(--gold2)}
 .brand span{display:block;font:600 8.5px Inter;color:var(--mut);letter-spacing:1.6px}
 select,.hbtn{background:#122442;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:600 13px Inter}
 main{max-width:640px;margin:0 auto;padding:14px 12px}
 .scanline{color:var(--mut);font:600 11px Inter;margin:0 2px 12px}
-.card{background:linear-gradient(180deg,#132544,#0E1C36);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px;animation:in .4s}
+.card{background:linear-gradient(180deg,#102036,#0B1828);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px;animation:in .4s}
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
 .ready{display:inline-flex;align-items:center;gap:7px;font:800 11px Inter;letter-spacing:1.2px;color:var(--green);border:1.5px solid var(--green);border-radius:20px;padding:4px 11px;margin-bottom:9px}
-.ready.errb{color:var(--red2);border-color:var(--red2)}
-.ready.busyb{color:var(--blue2);border-color:var(--blue2)}
+.ready.errb{color:var(--red);border-color:var(--red)}
+.ready.busyb{color:var(--gold2);border-color:var(--gold2)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 1.6s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-.spinner{width:14px;height:14px;border:2.5px solid var(--blue2);border-bottom-color:transparent;border-radius:50%;display:inline-block;animation:spin 1s linear infinite}
+.spinner{width:14px;height:14px;border:2.5px solid var(--gold2);border-bottom-color:transparent;border-radius:50%;display:inline-block;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .card h3{font:800 17px/1.3 Montserrat,Inter;margin-bottom:6px}
 .meta{color:var(--mut);font:600 12px Inter;margin-bottom:11px}
-.fresh{color:var(--red2);font-weight:800}
+.fresh{color:var(--gold2);font-weight:800}
 .chipS{color:#F5B841;border:1px solid #F5B841;border-radius:8px;padding:1px 6px;font-size:10px}
 .btns{display:flex;gap:9px;flex-wrap:wrap}
-.gen{background:linear-gradient(180deg,var(--red2),var(--red));color:#fff;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter;box-shadow:0 4px 14px #d32f2f55}
+.gen{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#08131F;border:0;border-radius:22px;padding:10px 20px;font:800 13px Inter;box-shadow:0 4px 14px #e8a02055}
 .re{background:#E8EDF4;color:#122442;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
 .pub{background:linear-gradient(180deg,var(--green),#16A34A);color:#fff;border:0;border-radius:22px;padding:10px 16px;font:800 13px Inter}
-.hd{background:#122442;border:1px solid var(--line);border-left:4px solid var(--red2);border-radius:10px;padding:10px 12px;font:800 14px/1.4 Montserrat,Inter;margin:12px 0 4px}
+.hd{background:#122442;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:10px 12px;font:800 14px/1.4 Montserrat,Inter;margin:12px 0 4px}
 .tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0 8px}
 .tab{flex:0 0 auto;background:#122442;border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:7px 11px;font:700 11.5px Inter}
-.tab.on{background:var(--blue);border-color:var(--blue2);color:#fff;box-shadow:0 0 12px #3f8edc66}
+.tab.on{background:var(--gold);border-color:var(--gold2);color:#08131F;box-shadow:0 0 12px #e8a02066}
 .out{background:#0B1830;border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;font:400 13.5px/1.6 Inter;color:#DCE6F5;max-height:340px;overflow-y:auto}
 .row{display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px;gap:6px}
 .copy{background:#BFD9F7;color:#0B2547;border:0;border-radius:16px;padding:6px 14px;font:800 11px Inter}
 .save{background:none;border:1px solid var(--line);color:var(--mut);border-radius:16px;padding:6px 12px;font:700 11px Inter}
 .credit{text-align:right;color:var(--mut);font:600 11.5px Inter;margin-top:7px}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0D1930f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 9.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0A1626f2;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font:600 9.5px Inter;display:flex;flex-direction:column;align-items:center;gap:3px}
 nav button i{font-style:normal;font-size:16px}
-nav button.on{color:var(--blue2)}
-.grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--blue2);margin:16px 4px 8px}
+nav button.on{color:var(--gold2)}
+.grp{font:800 12px Inter;letter-spacing:1.4px;color:var(--gold2);margin:16px 4px 8px}
 .src{display:flex;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font:600 13px Inter}
 .src em{color:var(--mut);font-style:normal;font-size:11px;white-space:nowrap}
 .set{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font:600 13px Inter;display:flex;justify-content:space-between;align-items:center}
@@ -61,10 +61,10 @@ nav button.on{color:var(--blue2)}
 <body>
 
 <div id="login">
-<svg width="60" height="66" viewBox="0 0 60 66" style="margin-bottom:12px"><defs><linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3F8EDC"/><stop offset="1" stop-color="#1E5AA8"/></linearGradient><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E53935"/><stop offset="1" stop-color="#C62828"/></linearGradient></defs><path d="M30 2 56 10v22c0 16-11 27-26 32C15 59 4 48 4 32V10Z" fill="#123061"/><path d="M30 6 52 13v19c0 13-9 23-22 28Z" fill="url(#gr)"/><path d="M30 6 8 13v19c0 13 9 23 22 28Z" fill="url(#gb)"/><path d="M36 2 24 30h7l-5 30 15-34h-8Z" fill="#fff" opacity=".9"/><text x="27" y="44" font-family="Arial Black,Arial" font-size="26" font-weight="900" fill="#fff" text-anchor="middle">R</text></svg>
-<h1>D RAY <b>SHOW</b></h1>
+<svg width="84" height="56" viewBox="0 0 120 80" style="margin-bottom:12px"><path d="M62 14 A30 30 0 1 0 62 66" fill="none" stroke="#fff" stroke-width="16"/><circle cx="52" cy="40" r="7" fill="#fff"/><path d="M66 26 A18 18 0 0 1 66 54" fill="none" stroke="#F2A61D" stroke-width="7"/><path d="M76 18 A28 28 0 0 1 76 62" fill="none" stroke="#F2A61D" stroke-width="7"/><rect x="88" y="12" width="40" height="14" fill="#fff"/><rect x="101" y="12" width="14" height="56" fill="#fff"/></svg>
+<h1>CELEBRITY <b>TELEGRAPH</b></h1>
 <p>YOUR DAILY GLOBAL UPDATE</p>
-<input id="user" placeholder="Username (admin1 / editor1)" autocomplete="username">
+<input id="user" placeholder="Username (ctadmin1 / cteditor1)" autocomplete="username">
 <input id="pin" type="password" placeholder="PIN" autocomplete="current-password">
 <button class="gen" style="width:100%;max-width:300px" data-act="login">🔓 ENTER NEWSROOM</button>
 <p style="margin-top:14px;font-size:11px">3 Admins • 2 Editors • Private Workspace</p>
@@ -72,10 +72,10 @@ nav button.on{color:var(--blue2)}
 
 <header>
 <div class="brand">
-<svg width="32" height="36" viewBox="0 0 60 66"><path d="M30 2 56 10v22c0 16-11 27-26 32C15 59 4 48 4 32V10Z" fill="#123061"/><path d="M30 6 52 13v19c0 13-9 23-22 28Z" fill="#E53935"/><path d="M30 6 8 13v19c0 13 9 23 22 28Z" fill="#3F8EDC"/><path d="M36 2 24 30h7l-5 30 15-34h-8Z" fill="#fff" opacity=".9"/><text x="27" y="44" font-family="Arial Black,Arial" font-size="26" font-weight="900" fill="#fff" text-anchor="middle">R</text></svg>
-<div><h1>D RAY <b>SHOW</b></h1><span>YOUR DAILY GLOBAL UPDATE</span></div>
+<svg width="40" height="27" viewBox="0 0 120 80"><path d="M62 14 A30 30 0 1 0 62 66" fill="none" stroke="#fff" stroke-width="16"/><circle cx="52" cy="40" r="7" fill="#fff"/><path d="M66 26 A18 18 0 0 1 66 54" fill="none" stroke="#F2A61D" stroke-width="7"/><path d="M76 18 A28 28 0 0 1 76 62" fill="none" stroke="#F2A61D" stroke-width="7"/><rect x="88" y="12" width="40" height="14" fill="#fff"/><rect x="101" y="12" width="14" height="56" fill="#fff"/></svg>
+<div><h1>CELEBRITY <b>TELEGRAPH</b></h1><span>YOUR DAILY GLOBAL UPDATE</span></div>
 </div>
-<select id="region"><option value="all">🌐 All</option><option value="world">🌍 World</option><option value="africa">🌍 Africa</option><option value="nigeria">🇳 Nigeria</option></select>
+<select id="region"><option value="all">🌐 All</option><option value="world">🌍 The World</option><option value="africa">🌍 Africa</option><option value="nigeria">🇳 Nigeria</option></select>
 <button class="hbtn" data-act="refresh">🔄</button>
 <button class="hbtn" data-act="logoutarm">🚪</button>
 </header>
@@ -94,9 +94,9 @@ nav button.on{color:var(--blue2)}
 
 <script>
 const $=s=>document.querySelector(s);
-const USERS={admin1:{pin:'1111',role:'Admin'},admin2:{pin:'2222',role:'Admin'},admin3:{pin:'3333',role:'Admin'},editor1:{pin:'4444',role:'Editor'},editor2:{pin:'5555',role:'Editor'}};
-const state={user:localStorage.getItem('drs_user')||'',role:localStorage.getItem('drs_role')||'',view:'dash',region:'all',arrived:JSON.parse(localStorage.getItem('drs_cache')||'[]'),seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',feedLog:'',scanning:false,blog:null,blogLoading:false,composing:false,editing:null,pendingImg:null,relay:false,relayCode:0,healed:false,synced:false,master:'',masterText:null,editBrain:false,brainText:'',arm:false};
-const isAdmin=()=>state.role==='Admin';const isBoss=()=>state.user==='admin1';
+const USERS={ctadmin1:{pin:'0000',role:'Admin'},ctadmin2:{pin:'0000',role:'Admin'},ctadmin3:{pin:'0000',role:'Admin'},cteditor1:{pin:'0000',role:'Editor'},cteditor2:{pin:'0000',role:'Editor'}};
+const state={user:localStorage.getItem('ct_user')||'',role:localStorage.getItem('ct_role')||'',view:'dash',region:'all',arrived:JSON.parse(localStorage.getItem('drs_cache')||'[]'),seen:JSON.parse(localStorage.getItem('drs_seen')||'[]'),out:{},tab:{},drafts:JSON.parse(localStorage.getItem('drs_drafts')||'[]'),apiKey:localStorage.getItem('drs_key')||'',ghToken:localStorage.getItem('drs_gh')||'',ghRepo:localStorage.getItem('drs_repo')||'',sound:true,lastScan:null,sampled:false,lastModel:'',testLog:'',feedLog:'',scanning:false,blog:null,blogLoading:false,composing:false,editing:null,pendingImg:null,relay:false,relayCode:0,healed:false,synced:false,master:'',masterText:null,editBrain:false,brainText:'',arm:false};
+const isAdmin=()=>state.role==='Admin';const isBoss=()=>state.user==='ctadmin1';
 const esc=s=>String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
 const safeJson=r=>r.text().then(t=>{try{return JSON.parse(t)}catch(e){return null}});
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return String(Math.abs(h))};
@@ -114,7 +114,7 @@ function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block'
 function beep(){if(!state.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.18)}catch(e){}}
 
 const DEFAULT_EDITORIAL=`[CORE]
-You are the Senior Breaking News Editor for D-RAY SHOW ("Your Daily Global Update"), a media house covering sports, politics and current happenings worldwide.
+You are the Senior Breaking News Editor for CELEBRITY TELEGRAPH ("Your Daily Global Update"), a media house covering breaking news, business, celebrity, politics, tech, science, health, music and gospel across Nigeria, Africa and the world.
 CORE RULES:
 - Treat the source text ONLY as facts. Rebuild the story from scratch (WHO/WHAT/WHERE/WHEN/WHY/HOW). Never copy sentences, phrases or paragraph order from the source.
 - Never invent facts, quotes, statistics or statements. If unverified, label it ("according to...", "the claim has not been independently verified").
@@ -122,29 +122,29 @@ CORE RULES:
 - No clickbait, no sensationalism. Facts first, clarity second, engagement third.
 - Deaths/crimes/disasters/allegations: respectful language, "police allege", "the suspect"; never present allegations as convictions.
 CREDIT RULE (never skip): "📰 Credit: {Source Name}".
-BRAND SIGN-OFF: "📺 D-Ray Show — Your Daily Global Update."
-SOCIAL HANDLES to append at the end of social formats: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport
+BRAND SIGN-OFF: "📺 Celebrity Telegraph — Your Daily Global Update."
+SOCIAL CLOSE: invite readers to follow Celebrity Telegraph on Facebook, Instagram, X, TikTok and YouTube.
 
 [TITLE]
 a Fox-News-style crafted headline — maximum 8 words, punchy present-tense, strong verb, clear, specific, factual, ALL-CAPS-ready, search-friendly, no clickbait, no emoji.
 
 [FB]
-Facebook & Instagram post. Line 1 = the title. Blank line. Then 🚨 lead sentence. Then "WHAT WE KNOW SO FAR:" with short bullet lines starting with •. Then "WHAT HAPPENS NEXT:" one line. Then credit line, brand sign-off, "Follow for updates as this story develops.", then 3-5 hashtags including #DRayShow. Meta-policy safe.
+Facebook & Instagram post. Line 1 = the title. Blank line. Then 🚨 lead sentence. Then "WHAT WE KNOW SO FAR:" with short bullet lines starting with •. Then "WHAT HAPPENS NEXT:" one line. Then credit line, brand sign-off, "Follow Celebrity Telegraph for updates as this story develops.", then 3-5 hashtags including #CelebrityTelegraph. Meta-policy safe.
 
 [TW]
 the tweet ONLY, maximum 280 characters: one fact + one status line + "📰 via {Source}" + max 2 hashtags.
 
 [VO]
-30-second TikTok/YouTube voice-over script, plain spoken lines with timecodes: 0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro. Include [ON SCREEN] cues with red BREAKING strap + country + logo bug. Fixed outro: "Follow D-Ray Show — your daily global update." End with [END CARD: royal-blue frame, red stripe, YOUR DAILY GLOBAL UPDATE].
+30-second TikTok/YouTube voice-over script, plain spoken lines with timecodes: 0:00 hook / 0:08 detail / 0:16 status / 0:22 next / 0:27 outro. Include [ON SCREEN] cues with gold BREAKING strap + country + CT logo bug. Fixed outro: "Follow Celebrity Telegraph — your daily global update." End with [END CARD: deep navy frame, gold stripe, YOUR DAILY GLOBAL UPDATE].
 
 [CM]
-commentary in plain blocks: line 1 the title, then WHY IT MATTERS: one short paragraph, THE KEY QUESTION: one line, OUR LINE AS A SHOW: one balanced sentence ending on the D-Ray standard.
+commentary in plain blocks: line 1 the title, then WHY IT MATTERS: one short paragraph, THE KEY QUESTION: one line, OUR LINE AS A SHOW: one balanced sentence ending on the Celebrity Telegraph standard.
 
 [FULL]
 a professional, medium-length blog news article of 4-6 flowing paragraphs (about 350-500 words). Write it exactly like a human journalist's blog post: paragraph 1 states the news immediately; the following paragraphs weave in the key details, background context, properly attributed statements and why it matters; the final paragraph states what is still unknown or what happens next. ABSOLUTELY NO labels or headings inside. ABSOLUTELY NO "SEO TITLE", NO "META DESCRIPTION", NO "KEYWORDS". Just clean paragraphs separated by blank lines, every fact intact, nothing invented.
 
 [IP]
-THE STANDARDIZED D-RAY SHOW 4:5 BREAKING-NEWS FLYER PROMPT (1080x1350), international broadcast standard like Fox News, Sky News and BBC Breaking — VERY BRIGHT, CINEMATIC, SATURATED, GLOSSY, CATCHY, and ROOTED IN REALITY. REALITY-ANCHOR RULE: first extract the real-world visual anchors of the story — the exact country and city, its flag, recognizable landmarks or skyline, the real type of place (market, parliament, airport, stadium, disaster zone, central bank, exchange floor), the uniforms or attire involved, and the event type — then build the scene so it closely resembles the actual press photographs publicly available for this exact event, country or place: same location look, same flags, same environment, same kind of action, same time of day as reported, so any viewer instantly recognizes the real story. PEOPLE RULE: when named humans are involved, depict figures that match their publicly known press appearance for this context (role, attire, setting, posture — an official at a podium with the right backdrop, an athlete in the right kit, a trader on the right floor); keep them respectful, accurate-in-context and clean; if an exact face cannot be guaranteed, use a role-accurate representative figure from a natural news angle (mid-shot, side or three-quarter view, back view at the scene) instead of a wrong or distorted face. REFERENCE RULE: if the image tool accepts image inputs, instruct the user to attach the closest real press photo of the event as a composition and color reference. Build EVERY flyer with this exact anatomy: (1) SCENE: ultra-clean photorealistic cinematic editorial render of the reality-anchored scene, bright studio-grade key light, blue and red rim lighting, shallow depth of field, crisp detail, no watermarks, no artifacts, no third-party logos, no distorted bodies; (2) TOP-LEFT brand lockup, exactly: the D-Ray Show shield logo — shield split royal-blue left / signal-red right, big white letter R, red lightning bolt through it — next to the wordmark "D RAY SHOW" where "D RAY" is royal blue and "SHOW" is signal red with a blue wireframe globe replacing the O, small grey tagline beneath "YOUR DAILY GLOBAL UPDATE"; (3) TOP-RIGHT: glowing signal-red chip "BREAKING NEWS" in bold white condensed capitals (use "DEVELOPING STORY" when not breaking); (4) BOTTOM THIRD Fox-style: thick signal-red headline bar with the story headline in HUGE white ultra-bold condensed ALL-CAPS (max 6-8 words, present tense, punchy, perfect spelling), beneath it a deep royal-blue ticker bar with small white capitals "YOUR DAILY GLOBAL UPDATE • LATEST UPDATES • GLOBAL COVERAGE • UNBIASED REPORTING"; (5) small dark chip with the real country flag + GMT time; (6) COLOR GRADE: royal blue #1E5AA8 to #3F8EDC with signal red #C62828 to #E53935 accents, brilliant whites, high contrast, glossy finish, safe margins; (7) all text perfect spelling, sharp kerning. End with: --ar 4:5`;
+THE STANDARDIZED CELEBRITY TELEGRAPH 4:5 BREAKING-NEWS FLYER PROMPT (1080x1350), international broadcast standard — VERY BRIGHT, CINEMATIC, SATURATED, GLOSSY, CATCHY, and ROOTED IN REALITY. REALITY-ANCHOR RULE: first extract the real-world visual anchors of the story — the exact country and city, its flag, recognizable landmarks or skyline, the real type of place (market, parliament, airport, stadium, disaster zone, central bank, exchange floor), the uniforms or attire involved, and the event type — then build the scene so it closely resembles the actual press photographs publicly available for this exact event, country or place: same location look, same flags, same environment, same kind of action, same time of day as reported, so any viewer instantly recognizes the real story. PEOPLE RULE: when named humans are involved, depict figures that match their publicly known press appearance for this context (role, attire, setting, posture); keep them respectful, accurate-in-context and clean; if an exact face cannot be guaranteed, use a role-accurate representative figure from a natural news angle (mid-shot, side or three-quarter view, back view at the scene) instead of a wrong or distorted face. REFERENCE RULE: if the image tool accepts image inputs, instruct the user to attach the closest real press photo of the event as a composition and color reference. Build EVERY flyer with this exact anatomy: (1) SCENE: ultra-clean photorealistic cinematic editorial render of the reality-anchored scene, bright studio-grade key light, navy and gold rim lighting, shallow depth of field, crisp detail, no watermarks, no artifacts, no third-party logos, no distorted bodies; (2) TOP-LEFT brand lockup, exactly: the Celebrity Telegraph logo — bold white letters C and T with a gold broadcast wave curving inside the C — beside the wordmark "CELEBRITY TELEGRAPH" in clean white capitals, small gold tagline beneath "YOUR DAILY GLOBAL UPDATE"; (3) TOP-RIGHT: glowing gold chip "BREAKING NEWS" in bold deep-navy condensed capitals (use "DEVELOPING STORY" when not breaking); (4) BOTTOM THIRD: thick gold headline bar with the story headline in HUGE deep-navy ultra-bold condensed ALL-CAPS (max 6-8 words, present tense, punchy, perfect spelling), beneath it a deep navy ticker bar with small white capitals "YOUR DAILY GLOBAL UPDATE • NIGERIA • AFRICA • THE WORLD"; (5) small dark chip with the real country flag + GMT time; (6) COLOR GRADE: deep navy #071120 to #12365E with gold #E8A020 to #FFB81C accents, brilliant whites, high contrast, glossy finish, safe margins; (7) all text perfect spelling, sharp kerning. End with: --ar 4:5`;
 function parseSections(t){const o={};let k=null;
 t.split('\n').forEach(L=>{const m=/^\[([A-Z]+)\]\s*$/.exec(L.trim());
 if(m){k=m[1];o[k]='';}else if(k){o[k]+=L+'\n'}});
@@ -161,7 +161,6 @@ try{
 state.masterText=null;state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
 }
 
-/* v21: server rejects empty input; tolerates string bodies */
 const AI_JS=`let K={};try{K=require('./keys.js')}catch(e){}
 function decKey(s){try{var a=String(s).split('.');var out='';for(var i=0;i<a.length;i++)out+=String.fromCharCode(parseInt(a[i],10));return out.split('').reverse().join('')}catch(e){return ''}}
 const KEY=process.env.AI_KEY||(K.AI_E?decKey(K.AI_E):(K.AI_B64?Buffer.from(K.AI_B64,'base64').toString('utf8'):''));
@@ -194,8 +193,8 @@ module.exports=async function handler(req,res){
 if(!TOK||!REPO)return res.status(500).json({error:'no_keys'});
 var b=req.body||{};
 if(typeof b==='string'){try{b=JSON.parse(b)}catch(e){b={}}}
-var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'dray-desk'};try{
- if(b.get){
+var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User-Agent':'ct-desk'};
+try{ if(b.get){
   var g=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
   if(!g.ok)return res.status(200).json({exists:false});
   var m=await g.json();return res.status(200).json({exists:true,meta:{sha:m.sha,content:m.content}});
@@ -204,22 +203,22 @@ var H={'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','User
  var g2=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{headers:H});
  if(g2.ok){var m2=await g2.json();sha=m2.sha}
  var body={message:b.message,content:b.content};if(sha)body.sha=sha;
- var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{method:'PUT',headers:{'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','Content-Type':'application/json','User-Agent':'dray-desk'},body:JSON.stringify(body)});
+ var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+b.path,{method:'PUT',headers:{'Authorization':'token '+TOK,'Accept':'application/vnd.github+json','Content-Type':'application/json','User-Agent':'ct-desk'},body:JSON.stringify(body)});
  if(!r.ok){var t=await r.text();return res.status(500).json({error:'GitHub '+r.status+' '+t.slice(0,80)})}
  return res.status(200).json({ok:true});
 }catch(e){return res.status(500).json({error:String(e).slice(0,120)})}
 };
 `;
-const RELAY_CODE=`// D-Ray Show — server-side news relay (Vercel serverless function)
+const RELAY_CODE=`// Celebrity Telegraph — server-side news relay (Vercel serverless function)
 const FEEDS=[
 {region:'world',flag:'🌍',name:'World',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news&hl=en-US&gl=US&ceid=US:en'},
 {region:'africa',flag:'🌍',name:'Africa',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+africa&hl=en-US&gl=US&ceid=US:en'},
-{region:'nigeria',flag:'🇳🇬',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
+{region:'nigeria',flag:'🇳',name:'Nigeria',goog:1,cap:12,url:'https://news.google.com/rss/search?q=breaking+news+nigeria&hl=en-US&gl=US&ceid=US:en'},
 {region:'world',flag:'🇬🇧',name:'BBC World',src:'BBC',country:'UK',cap:8,url:'https://feeds.bbci.co.uk/news/world/rss.xml'},
 {region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
 {region:'nigeria',flag:'🇳',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const dec=function(s){return String(s).replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g,'$1').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/'/g,"'").replace(/"/g,'"').trim()};
@@ -236,15 +235,15 @@ module.exports=async function handler(req,res){
  await Promise.all(FEEDS.map(async function(f){
   try{
    var c=new AbortController();var t=setTimeout(function(){c.abort()},8000);
-   var r=await fetch(f.url,{signal:c.signal,headers:{'User-Agent':'Mozilla/5.0 (D-RayShowDesk)'}});
+   var r=await fetch(f.url,{signal:c.signal,headers:{'User-Agent':'Mozilla/5.0 (CTDesk)'}});
    clearTimeout(t);
    var items=parse(await r.text()).slice(0,f.cap||10);
    for(var i=0;i<items.length;i++)out.push({title:items[i].title,link:items[i].link,pub:items[i].pub,region:f.region,flag:f.flag,country:f.country||f.name,src:f.src||null,goog:!!f.goog});
   }catch(e){}
  }));
  res.setHeader('Cache-Control','s-maxage=60, stale-while-revalidate=120');
- res.status(200).json({ok:true,items:out});};
-`;
+ res.status(200).json({ok:true,items:out});
+};`;
 function keysCode(){return 'module.exports={AI_E:'+JSON.stringify(encKey(state.apiKey.trim()))+',GH_E:'+JSON.stringify(encKey(state.ghToken.trim()))+',GH_REPO:'+JSON.stringify(state.ghRepo.trim())+'};\n'}
 const MANUAL_ENV_PLAN=`GITHUB BLOCKED THE KEY FILE (409). USE THE MANUAL PLAN (3 MIN, ONE-TIME, CAN NEVER BE BLOCKED):
 1. Open vercel.com → your project → Settings → Environment Variables.
@@ -260,13 +259,12 @@ const FEEDS=[
 {region:'world',flag:'🇶🇦',name:'Al Jazeera',src:'Al Jazeera',country:'Qatar',cap:8,url:'https://www.aljazeera.com/xml/rss/all.xml'},
 {region:'nigeria',flag:'🇳🇬',name:'Channels TV',src:'Channels Television',country:'Nigeria',cap:8,url:'https://www.channelstv.com/feed/'},
 {region:'nigeria',flag:'🇳🇬',name:'Punch',src:'Punch',country:'Nigeria',cap:8,url:'https://punchng.com/feed/'},
-{region:'nigeria',flag:'🇳🇬',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
+{region:'nigeria',flag:'🇳',name:'Premium Times',src:'Premium Times',country:'Nigeria',cap:8,url:'https://www.premiumtimesng.com/feed'},
 {region:'africa',flag:'🇿🇦',name:'SABC News',src:'SABC News',country:'South Africa',cap:8,url:'https://www.sabcnews.com/sabcnews/feed/'},
 {region:'africa',flag:'🇰🇪',name:'Daily Nation',src:'Daily Nation',country:'Kenya',cap:8,url:'https://nation.africa/kenya/rss'}];
 const SOURCES={world:['Reuters','Associated Press','BBC Breaking','CNN','Al Jazeera','Sky News','Bloomberg','AFP','The Guardian','NBC News'],africa:['Africanews','News24 (SA)','SABC News','Daily Nation (KE)','Citizen Digital (KE)','KTN News (KE)','Daily Graphic (GH)','TimesLIVE (SA)','The Africa Report','Jeune Afrique'],nigeria:['Channels Television','Arise News','TVC News','Punch','Premium Times','The Cable']};
 
 function parseXML(t){const xml=new DOMParser().parseFromString(t,'text/xml');return[...xml.querySelectorAll('item')].map(n=>({title:(n.querySelector('title')||{}).textContent||'',link:(n.querySelector('link')||{}).textContent||'',pub:(n.querySelector('pubDate')||{}).textContent||''}))}
-/* v21: fetchT now accepts request options */
 function fetchT(url,ms,opts){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,Object.assign({signal:c.signal},opts||{})).finally(()=>clearTimeout(t))}
 async function pull(f){
 const attempts=[
@@ -292,9 +290,9 @@ try{
  const r=await fetchT('/api/feeds',15000);
  state.relayCode=r.status;
  if(r.ok){const d=await safeJson(r);
-  if(d&&d.items&&d.items.length){state.relay=true;return d.items}}}catch(e){state.relayCode='net'}
-state.relay=false;
-const all=[];
+  if(d&&d.items&&d.items.length){state.relay=true;return d.items}}
+}catch(e){state.relayCode='net'}
+state.relay=false;const all=[];
 const g=guardian();
 await Promise.all(FEEDS.map(async f=>{
  const it=await pull(f);
@@ -309,7 +307,7 @@ const items=await gather();
 if((state.relayCode===404||state.relayCode===500)&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.healed){
  state.healed=true;
  toast('🛠 Relay missing — auto-installing…');
- ghUpsert(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Auto-install D-Ray news relay')
+ ghUpsert(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Auto-install CT news relay')
   .then(()=>{toast('✅ Relay installed — rescanning in 30s');setTimeout(checkFeeds,30000)})
   .catch(er=>toast('⚠️ Auto-install failed: '+er.message));
 }
@@ -339,11 +337,11 @@ function loadSamples(){
 if(state.sampled)return;state.sampled=true;
 [{t:'Major earthquake strikes eastern Turkey',s:'Reuters',f:'🇹🇷',c:'Turkey',r:'world'},
 {t:'CBN announces emergency measures as naira slides',s:'Channels Television',f:'🇳',c:'Nigeria',r:'nigeria'},
-{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰🇪',c:'Kenya',r:'africa'}]
+{t:'Major fire breaks out at Nairobi market',s:'Citizen Digital',f:'🇰',c:'Kenya',r:'africa'}]
 .forEach(x=>state.arrived.unshift({id:'smp'+Math.random().toString(36).slice(2,8),title:x.t,link:'https://example.com/'+x.r,source:x.s,flag:x.f,country:x.c,region:x.r,ts:Date.now(),sample:true}));
 render()}
-function prov(){return state.apiKey.trim().startsWith('gsk_')
- ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'}
+
+function prov(){return state.apiKey.trim().startsWith('gsk_') ?{url:'https://api.groq.com/openai/v1/chat/completions',models:['llama-3.3-70b-versatile','meta-llama/llama-4-scout-17b-16e-instant','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'],name:'Groq'}
  :{url:'https://api.x.ai/v1/chat/completions',models:['grok-3-mini','grok-3','grok-4','grok-2-latest'],name:'xAI Grok'}}
 async function discoverModels(p){
 try{
@@ -365,7 +363,6 @@ return list}
 async function aiCall(userMsg){
 if(!state.master)state.master=buildMaster(parseSections(DEFAULT_EDITORIAL));
 try{
- /* v21: proper POST with the full brain + story attached */
  const r=await fetchT('/api/ai',60000,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:state.master,user:userMsg})});
  if(r.ok){const d=await safeJson(r);if(d&&d.text&&d.text.length>40){state.lastModel='Server / '+d.model;return{text:d.text,model:d.model,prov:'Server'}}}
  if(r.status===404&&isBoss()&&state.ghToken.trim()&&state.ghRepo.trim()&&!state.synced){
@@ -377,9 +374,9 @@ try{
   }catch(e){}
  }
  if(r.status===500){const d=await safeJson(r);
-  if(d&&d.error==='no_keys'&&!state.apiKey.trim())throw new Error('Keys not on the server yet — ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');}
-}catch(e){ if(String(e.message).includes('Admin1'))throw e; }
-if(!state.apiKey.trim())throw new Error('Ask Admin1 to tap ☁️ SYNC KEYS TO SERVER in Settings');
+  if(d&&d.error==='no_keys'&&!state.apiKey.trim())throw new Error('Keys not on the server yet — ask ctadmin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');}
+}catch(e){ if(String(e.message).includes('ctadmin1'))throw e; }
+if(!state.apiKey.trim())throw new Error('Ask ctadmin1 to tap ☁️ SYNC KEYS TO SERVER in Settings');
 const p=prov();
 const list=await modelList(p);
 let lastErr='';
@@ -390,10 +387,10 @@ for(const m of list){
   if(res.ok){let d=null;try{d=JSON.parse(body)}catch(e){}
    if(d&&d.choices){state.lastModel=p.name+' / '+m;return{text:d.choices[0].message.content,model:m,prov:p.name}}}
   lastErr=p.name+' '+m+' → HTTP '+res.status+': '+body.slice(0,140);
-  if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.'); }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
+  if(res.status===401||res.status===403)throw new Error('Key rejected by '+p.name+' ('+res.status+'). Re-paste the correct key in Settings.');
+ }catch(e){ if(String(e.message).includes('Key rejected'))throw e; lastErr=String(e).slice(0,140);}
 }
-throw new Error(lastErr||'All AI models failed');
-}
+throw new Error(lastErr||'All AI models failed');}
 async function testKey(){
 if(!state.apiKey)return toast('⚠️ Paste a key first');
 toast('🩺 Testing your key…');
@@ -417,7 +414,7 @@ const log=[];
 try{
  const r=await fetchT('/api/feeds',12000);let n=0;
  const d=await safeJson(r);n=d&&d.items?d.items.length:0;
- log.push('/api/feeds (your Vercel relay) → HTTP '+r.status+', '+n+' items'+(r.status===404?' — MISSING: admin1 tap 🛠 INSTALL NEWS RELAY':''));
+ log.push('/api/feeds (your Vercel relay) → HTTP '+r.status+', '+n+' items'+(r.status===404?' — MISSING: ctadmin1 tap 🛠 INSTALL NEWS RELAY':''));
 }catch(e){log.push('/api/feeds → network error')}
 try{const r=await fetchT('https://content.guardianapis.com/search?page-size=1&api-key=test',9000);log.push('Guardian API (CORS-native) → HTTP '+r.status)}catch(e){log.push('Guardian API → blocked')}
 try{const r=await fetchT('https://api.allorigins.win/raw?url='+encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml'),10000);log.push('allorigins proxy → HTTP '+r.status)}catch(e){log.push('allorigins proxy → blocked/timeout on this network')}
@@ -439,10 +436,10 @@ const marks=[];
 for(const k of keys){
  const re=new RegExp('["\'\\*\\s\\n{,]*'+k+'["\'\\*]*\\s*:','i');
  const m=re.exec(t);
- if(m)marks.push({k,s:m.index,e:m.index+m[0].length});}
+ if(m)marks.push({k,s:m.index,e:m.index+m[0].length});
+}
 if(marks.length<2)return null;
-marks.sort((a,b)=>a.s-b.s);
-const obj={};
+marks.sort((a,b)=>a.s-b.s);const obj={};
 for(let i=0;i<marks.length;i++){
  const start=marks[i].e;
  const end=i+1<marks.length?marks[i+1].s:t.length;
@@ -480,7 +477,7 @@ try{
 if(!state.ghToken.trim()||!repo||!repo.includes('/'))return null;
 try{const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{headers:ghAuth()});if(!r.ok)return null;return await safeJson(r)}catch(e){return null}}
 async function ghUpsertLocal(repo,path,b64,msg){
-if(!state.ghToken.trim()||!repo)throw new Error('Admin1: save GitHub token + repo in Settings first');
+if(!state.ghToken.trim()||!repo)throw new Error('ctadmin1: save GitHub token + repo in Settings first');
 if(!repo.includes('/'))throw new Error('Repo must be username/repo-name — re-save GitHub in Settings');
 const meta=await ghGetMeta(repo,path);
 const body={message:msg,content:b64};
@@ -488,18 +485,18 @@ if(meta&&meta.sha)body.sha=meta.sha;
 const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{...ghAuth(),'Content-Type':'application/json'},body:JSON.stringify(body)});
 if(!r.ok){const t=await r.text();throw new Error('GitHub '+r.status+' '+t.slice(0,90))}
 return await safeJson(r)||{}}
-async function ghUpsert(repo,path,b64,msg){try{
+async function ghUpsert(repo,path,b64,msg){
+try{
  const r=await fetch('/api/gh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,message:msg,content:b64})});
- if(r.ok)return await safeJson(r)||{};
- const d=await safeJson(r);
- if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask Admin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
-}catch(e){ if(String(e.message).includes('Admin1'))throw e; }
+ if(r.ok)return await safeJson(r)||{}; const d=await safeJson(r);
+ if(d&&d.error==='no_keys'&&!state.ghToken.trim())throw new Error('Ask ctadmin1 to open Settings and tap ☁️ SYNC KEYS TO SERVER');
+}catch(e){ if(String(e.message).includes('ctadmin1'))throw e; }
 return ghUpsertLocal(repo,path,b64,msg)}
 function fileToB64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,1200/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.82).split(',')[1])};img.onerror=rej;img.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
 function blogHTML(p){
 const paras=p.body.split(/\n{2,}/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).replace(/\n/g,'<br>')+'</p>').join('');
-const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.title,description:p.desc,datePublished:new Date().toISOString(),author:{'@type':'Organization',name:'D-Ray Show'},publisher:{'@type':'Organization',name:'D-Ray Show Blog News'},mainEntityOfPage:p.url};
-return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.title)+' | D-Ray Show Blog News</title><meta name="description" content="'+esc(p.desc)+'"><link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.title)+'"><meta property="og:description" content="'+esc(p.desc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+(p.img||location.origin+'/logo.png')+'"><meta property="og:site_name" content="D-Ray Show Blog News"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#F7F8FC;color:#101828}header{background:#0A1220;color:#fff;padding:18px 16px}header h1{margin:0;font:800 20px Arial}header h1 b{color:#E53935}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px}.meta{color:#8A97AB;font:12px Arial;margin-bottom:14px}img.hero{width:100%;border-radius:12px;margin:0 0 18px}p{margin:0 0 16px}.cred{background:#0A1220;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6}footer{color:#8A97AB;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#1E5AA8}</style></head><body><header><div class="wrap"><h1>D RAY <b>SHOW</b> BLOG NEWS</h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.title)+'</h2><p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • D-Ray Show Blog News</p>'+(p.img?'<img class="hero" src="'+p.img+'" alt="'+esc(p.title)+'">':'')+paras+'<div class="cred">📰 Credit: '+esc(p.source||'D-Ray Show')+'<br>📺 D-Ray Show — Your Daily Global Update.<br>Follow: IG @dray.show • X @show_ray2026 • YT @drayshow-politicssport • <a href="'+location.origin+'/blog/" style="color:#7FB4F5">Read more at D-Ray Show Blog News</a></div></main><footer>© D-Ray Show Blog News • Latest Updates. Global Coverage. Unbiased Reporting.</footer></body></html>'}
+const ld={'@context':'https://schema.org','@type':'NewsArticle',headline:p.title,description:p.desc,datePublished:new Date().toISOString(),author:{'@type':'Organization',name:'Celebrity Telegraph'},publisher:{'@type':'Organization',name:'Celebrity Telegraph',logo:{'@type':'ImageObject',url:location.origin+'/logo.png'}},mainEntityOfPage:p.url};
+return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(p.title)+' | Celebrity Telegraph</title><meta name="description" content="'+esc(p.desc)+'"><link rel="canonical" href="'+p.url+'"><link rel="icon" href="/logo.png"><meta property="og:type" content="article"><meta property="og:title" content="'+esc(p.title)+'"><meta property="og:description" content="'+esc(p.desc)+'"><meta property="og:url" content="'+p.url+'"><meta property="og:image" content="'+(p.img||location.origin+'/logo.png')+'"><meta property="og:site_name" content="Celebrity Telegraph"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">'+JSON.stringify(ld)+'<\/script><style>body{margin:0;font:17px/1.7 Georgia,serif;background:#071120;color:#F4F7FB}header{background:#0A1626;color:#fff;padding:18px 16px;border-bottom:2px solid #E8A020}header h1{margin:0;font:800 20px Arial}header h1 b{color:#FFB81C}header p{margin:4px 0 0;font:600 10px Arial;letter-spacing:2px;color:#9FB0C7}.wrap{max-width:720px;margin:0 auto;padding:0 16px}h2.hd2{font:800 26px/1.3 Arial;margin:24px 0 6px;color:#fff}.meta{color:#9FB0C7;font:12px Arial;margin-bottom:14px}img.hero{width:100%;border-radius:12px;margin:0 0 18px}p{margin:0 0 16px}.cred{background:#0A1626;color:#fff;border-radius:10px;padding:12px 14px;font:13px Arial;margin:24px 0;line-height:1.6;border-left:4px solid #E8A020}footer{color:#9FB0C7;font:12px Arial;padding:20px 16px 40px;text-align:center}a{color:#FFB81C}</style></head><body><header><div class="wrap"><h1>CELEBRITY <b>TELEGRAPH</b></h1><p>YOUR DAILY GLOBAL UPDATE</p></div></header><main class="wrap"><h2 class="hd2">'+esc(p.title)+'</h2><p class="meta">'+new Date().toUTCString().slice(0,22)+' GMT'+(p.source?' • Credit: '+esc(p.source):'')+' • Celebrity Telegraph</p>'+(p.img?'<img class="hero" src="'+p.img+'" alt="'+esc(p.title)+'">':'')+paras+'<div class="cred">📰 Credit: '+esc(p.source||'Celebrity Telegraph')+'<br>📺 Celebrity Telegraph — Your Daily Global Update.<br>Follow Celebrity Telegraph on Facebook, Instagram, X, TikTok and YouTube • <a href="'+location.origin+'/blog/">Read more at Celebrity Telegraph</a></div></main><footer>© Celebrity Telegraph • Nigeria • Africa • The World</footer></body></html>'}
 async function publishToBlog(title,bodyText,source,o){
 o=o||{};
 const repo=state.ghRepo.trim()||'server';
@@ -512,7 +509,7 @@ await ghUpsert(repo,'blog/'+slug+'.html',b64t(blogHTML({title,desc,source,img,bo
 const meta=await ghGetMeta(repo,'blog/index.json');
 let idx=[];if(meta&&meta.content){try{idx=JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/\n/g,'')))))}catch(e){}}
 const old=idx.find(pp=>pp.id===slug);
-const entry={id:slug,title,desc,source:source||'D-Ray Show',img,date:old?old.date:new Date().toISOString(),url,body:bodyText};
+const entry={id:slug,title,desc,source:source||'Celebrity Telegraph',img,date:old?old.date:new Date().toISOString(),url,body:bodyText};
 if(old)idx[idx.indexOf(old)]=entry;else idx.unshift(entry);
 await ghUpsert(repo,'blog/index.json',b64t(JSON.stringify(idx,null,1)),'Update blog index');
 loadBlog();
@@ -537,13 +534,13 @@ ${state.out[it.id]?panelHTML(it):''}</div>`}
 function render(){
 const setBtn=document.querySelector('#nav [data-v="set"]');
 if(setBtn)setBtn.style.display=isAdmin()?'':'none';
-if(state.view==='set'&&!isAdmin())state.view='dash';document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
+if(state.view==='set'&&!isAdmin())state.view='dash';
+document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===state.view));
 const v=state.view;
-if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);
-$('#view').innerHTML=`<div class="scanline">🛰 Build v21 • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
+if(v==='dash'){const l=state.arrived.filter(i=>state.region==='all'||i.region===state.region);$('#view').innerHTML=`<div class="scanline">🛰 Celebrity Telegraph Desk • brain: ${state.masterText?'📄 editorial.txt':'built-in'} • route: ${state.relay?'⚡ Vercel relay':(state.relayCode===404?'🛠 auto-healing…':'🌐 proxy+Guardian')} • today: ${state.arrived.length} stories${state.scanning?' • 🔄 scanning…':''} • last scan: ${state.lastScan?fmt(state.lastScan)+' GMT':'—'}</div>`+(l.length?l.map(cardHTML).join(''):`<div class="empty">Scanning 10 channels + Guardian…<br>Stories appear here as each channel lands.<br><br><button class="gen" data-act="refresh">🔄 FETCH NOW</button><br><br><button class="re" data-act="sample">🧪 LOAD SAMPLE BREAK</button></div>`);return}
 if(v==='alerts'){$('#view').innerHTML=state.arrived.length?'<div class="grp">🔔 TODAY\'S BREAKS — ALL CHANNELS</div>'+state.arrived.map(i=>`<div class="src"><span>🟢 ${esc(i.title)}</span><em>${fmt(i.ts)} • ${agoLabel(i.ts)}</em></div>`).join(''):'<div class="empty">No alerts yet.</div>';return}
-if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳🇬 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
-if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 D-RAY SHOW BLOG NEWS</div>
+if(v==='sources'){$('#view').innerHTML=['world','africa','nigeria'].map(r=>`<div class="grp">${{world:'🌍 THE WORLD — 10',africa:'🌍 AFRICA — 10',nigeria:'🇳 NIGERIA — 6'}[r]}</div>`+SOURCES[r].map(s=>`<div class="src"><span>${s}</span><em>MONITORED</em></div>`).join('')).join('');return}
+if(v==='blog'){$('#view').innerHTML=`<div class="grp">📰 CELEBRITY TELEGRAPH BLOG</div>
 <div class="btns" style="margin-bottom:12px"><button class="gen" data-act="compose">✍ ${state.composing?'✖ CLOSE':'CREATE NEWS'}</button><button class="re" data-act="blogrefresh">🔄 REFRESH</button></div>
 ${state.composing?`<div class="card">${state.editing?'<div class="hd">✏️ EDITING: '+esc(state.editing.title)+'</div>':''}
 <input id="cTitle" placeholder="Headline / Title" style="max-width:none" value="${esc(state.editing?state.editing.title:'')}">
@@ -557,7 +554,7 @@ if(v==='drafts'){$('#view').innerHTML=state.drafts.length?state.drafts.map((d,i)
 if(v==='set'){
 const boss=isBoss();
 $('#view').innerHTML=`<div class="grp">⚙️ NEWSROOM SETTINGS</div>
-<div class="set"><span>🏗 Build</span><em>v21</em></div>
+<div class="set"><span>🏗 Brand</span><em>Celebrity Telegraph</em></div>
 <div class="set"><span>🛰 News route</span><em>${state.relay?'⚡ Vercel relay active':(state.relayCode===404?'🛠 relay auto-healing':'🌐 proxy+Guardian mode')}</em></div>
 <div class="set"><span>🧠 Editorial brain</span><em>${state.masterText?'📄 editorial.txt live':'built-in default'}</em></div>
 ${boss?`
@@ -577,8 +574,8 @@ ${state.testLog?`<div class="out" style="margin-top:10px">${esc(state.testLog)}<
 <input id="ghRepo" value="${esc(state.ghRepo)}" placeholder="repo-name or username/repo-name" style="max-width:none">
 <button class="pub" style="width:100%" data-act="savegh">💾 SAVE GITHUB</button>
 <div class="empty" style="padding:8px 10px">🔐 Keys are stored as scrambled number codes GitHub cannot read.</div>`
-:`<div class="set"><span>🔐 AI & publishing keys</span><em>✅ managed on server by Admin1</em></div>
-<div class="empty" style="padding:8px 10px">Keys and server controls belong to Admin1. Your workspace is ready — go create. 🟢</div>`}
+:`<div class="set"><span>🔐 AI & publishing keys</span><em>✅ managed on server by ctadmin1</em></div>
+<div class="empty" style="padding:8px 10px">Keys and server controls belong to ctadmin1. Your workspace is ready — go create. 🟢</div>`}
 <button class="re" style="width:100%;margin-top:8px" data-act="testfeeds">🛰 FEEDS TEST</button>
 ${state.feedLog?`<div class="out" style="margin-top:10px">${esc(state.feedLog)}</div>`:''}
 <div class="set" style="margin-top:10px"><span>🔔 Sound on new break</span><input type="checkbox" data-set="sound" ${state.sound?'checked':''} style="width:auto;margin:0"></div>
@@ -586,12 +583,12 @@ ${state.feedLog?`<div class="out" style="margin-top:10px">${esc(state.feedLog)}<
 <div class="set"><span>🤖 Last AI model</span><em>${esc(state.lastModel||'—')}</em></div>
 <div class="empty">Staff: 3 Admins • 2 Editors • Host: Vercel</div>`}}
 
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
+document.addEventListener('click',async e=>{
+const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset;
 if(d.act==='login'){const u=$('#user').value.trim().toLowerCase(),p=$('#pin').value;
- if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('drs_user',u);localStorage.setItem('drs_role',USERS[u].role);$('#login').style.display='none';start();}
- else toast('❌ Invalid username or PIN');return}
+ if(USERS[u]&&USERS[u].pin===p){state.user=u;state.role=USERS[u].role;localStorage.setItem('ct_user',u);localStorage.setItem('ct_role',USERS[u].role);$('#login').style.display='none';start();} else toast('❌ Invalid username or PIN');return}
 if(d.act==='logoutarm'){
- if(state.arm){localStorage.removeItem('drs_user');localStorage.removeItem('drs_role');location.reload();}
+ if(state.arm){localStorage.removeItem('ct_user');localStorage.removeItem('ct_role');location.reload();}
  else{state.arm=true;toast('🚪 Tap the door again to log out');setTimeout(()=>{state.arm=false},3000);}
  return}
 if(d.act==='nav'){state.view=d.v;if(d.v==='blog')loadBlog();render();return}
@@ -610,7 +607,7 @@ if(d.act==='compose'){state.composing=!state.composing;if(!state.composing){stat
 if(d.act==='pubmanual'){const t=$('#cTitle').value.trim(),bo=stripBlog($('#cBody').value.trim()),so=$('#cSource').value.trim();
  if(!t||!bo)return toast('⚠️ Title + story required');
  toast('📤 Publishing…');
- publishToBlog(t,bo,so||'D-Ray Show',{imgB64:state.pendingImg,edit:state.editing}).then(()=>{state.composing=false;state.editing=null;state.pendingImg=null;toast('🚀 LIVE! Link in Blog tab');render()}).catch(er=>toast('⚠️ '+er.message));return}
+ publishToBlog(t,bo,so||'Celebrity Telegraph',{imgB64:state.pendingImg,edit:state.editing}).then(()=>{state.composing=false;state.editing=null;state.pendingImg=null;toast('🚀 LIVE! Link in Blog tab');render()}).catch(er=>toast('⚠️ '+er.message));return}
 if(d.act==='blogrefresh'){loadBlog();return}
 if(d.act==='blogcopy'){navigator.clipboard.writeText(state.blog[d.i].url).then(()=>toast('🔗 Link copied!'));return}
 if(d.act==='blogshare'){const p=state.blog[d.i];if(navigator.share)navigator.share({title:p.title,url:p.url}).catch(()=>{});else navigator.clipboard.writeText(p.url).then(()=>toast('🔗 Link copied!'));return}
@@ -635,13 +632,13 @@ if(d.act==='savegh'){
    const r=await fetch('https://api.github.com/user',{headers:{Authorization:'token '+state.ghToken,Accept:'application/vnd.github+json'}});
    const u=await safeJson(r);
    if(u&&u.login)repo=u.login+'/'+repo;
-   else toast('⚠️ Could not verify token — check it has repo scope');  }catch(e){}
+   else toast('⚠️ Could not verify token — check it has repo scope');
+  }catch(e){}
  }
- state.ghRepo=repo;
- localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);
+ state.ghRepo=repo; localStorage.setItem('drs_gh',state.ghToken);localStorage.setItem('drs_repo',state.ghRepo);
  toast('✅ GitHub saved'+(repo.includes('/')?' as '+repo:''));return}
 if(d.act==='synckeys'){
- if(!isBoss())return toast('⚠️ Admin1 only');
+ if(!isBoss())return toast('⚠️ ctadmin1 only');
  if(!state.apiKey.trim())return toast('⚠️ Save your AI key first');
  if(!state.ghToken.trim()||!state.ghRepo.trim())return toast('⚠️ Save GitHub token + repo first');
  if(!state.ghRepo.includes('/'))return toast('⚠️ Repo must be username/repo — tap SAVE GITHUB again first');
@@ -656,10 +653,10 @@ if(d.act==='synckeys'){
   else toast('⚠️ '+e.message);
  }})();return}
 if(d.act==='installrelay'){
- if(!isBoss())return toast('⚠️ Admin1 only');
+ if(!isBoss())return toast('⚠️ ctadmin1 only');
  if(!state.ghToken.trim()||!state.ghRepo.trim())return toast('⚠️ Save GitHub token + repo first');
  toast('🛠 Installing relay…');
- ghUpsertLocal(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Install D-Ray news relay').then(()=>toast('✅ Relay installed — wait ~20s for Vercel, then 🔄')).catch(er=>toast('⚠️ '+er.message));return}
+ ghUpsertLocal(state.ghRepo.trim(),'api/feeds.js',b64t(RELAY_CODE),'Install CT news relay').then(()=>toast('✅ Relay installed — wait ~20s for Vercel, then 🔄')).catch(er=>toast('⚠️ '+er.message));return}
 if(d.act==='testfeeds'){testFeeds();return}
 if(d.act==='testkey'){if(!isBoss())return;testKey();return}
 if(d.act==='sample'){loadSamples();return}
