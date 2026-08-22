@@ -1,10 +1,10 @@
 {
-  "name": "D-Ray Show Newsroom",
-  "short_name": "D-Ray Desk",
+  "name": "Celebrity Telegraph Newsroom",
+  "short_name": "CT Desk",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0A1220",
-  "theme_color": "#1E5AA8",
+  "background_color": "#071120",
+  "theme_color": "#071120",
   "icons": [
     { "src": "logo.png", "sizes": "192x192", "type": "image/png" },
     { "src": "logo.png", "sizes": "512x512", "type": "image/png" }
